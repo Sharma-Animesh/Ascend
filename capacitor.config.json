@@ -1,0 +1,8 @@
+{
+  "appId": "com.thegatewaydigital.ascend",
+  "appName": "ASCEND",
+  "webDir": "dist",
+  "backgroundColor": "#04060d",
+  "android": { "allowMixedContent": false },
+  "server": { "androidScheme": "https" }
+}
