@@ -318,7 +318,7 @@ export default function Landing() {
           </div>
           <p className="mx-auto mt-4 max-w-2xl text-xs leading-relaxed text-mute">
             ASCEND provides general fitness information, not medical advice. Consult a physician before starting.
-            Ages 16+.
+            Ages 18+.
           </p>
           <p className="mt-2 text-[0.68rem] text-mute/70">
             All characters, emblems and artwork in ASCEND are original creations. © {new Date().getFullYear()} ASCEND.

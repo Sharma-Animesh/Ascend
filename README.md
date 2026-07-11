@@ -76,11 +76,11 @@ logs. Delete it from the Supabase dashboard (Authentication → Users) whenever 
 
 ## Auth behavior
 
-Email + password via Supabase Auth. The project currently has **email confirmation ON** with no
-custom SMTP — Supabase's built-in mailer only reliably delivers to project team members. For public
-signups either:
-1. Dashboard → Authentication → Sign In / Providers → disable "Confirm email" (instant signups), or
-2. Configure custom SMTP (Authentication → Emails → SMTP settings) for real confirmation emails.
+Email + password via Supabase Auth. **Email confirmation is currently OFF** (signups log in
+instantly) — appropriate for development. Before production, either keep it off knowingly or
+re-enable it with real deliverability: turn "Confirm email" back on (Dashboard → Authentication →
+Sign In / Providers) AND configure custom SMTP (Authentication → Emails → SMTP settings — a Gmail
+app password works for testing; use a transactional provider like Resend/Brevo for launch).
 
 ## Android / Play Store
 

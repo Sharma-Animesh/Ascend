@@ -270,7 +270,7 @@ export default function Register() {
             required
           />
           <span>
-            I am <span className="text-ink">16 or older</span> and accept that ASCEND provides general fitness
+            I am <span className="text-ink">18 or older</span> and accept that ASCEND provides general fitness
             information, <span className="text-ink">not medical advice</span>.
           </span>
         </label>

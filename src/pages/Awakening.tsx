@@ -208,13 +208,13 @@ export default function Awakening() {
   const patch = (p: Partial<Draft>) => setDraft((d) => ({ ...d, ...p }))
 
   // ----- Parsed & validated values -----
-  const ageN = numInRange(draft.age, 16, 100)
+  const ageN = numInRange(draft.age, 18, 100)
   const heightN = numInRange(draft.height, 100, 250)
   const weightN = numInRange(draft.weight, 30, 300)
   const targetProvided = draft.target.trim() !== ''
   const targetN = numInRange(draft.target, 30, 300)
 
-  const ageError = draft.age.trim() !== '' && ageN === null ? 'The System accepts Hunters aged 16–100.' : null
+  const ageError = draft.age.trim() !== '' && ageN === null ? 'The System accepts Hunters aged 18–100.' : null
   const heightError = draft.height.trim() !== '' && heightN === null ? 'Enter a height between 100 and 250 cm.' : null
   const weightError = draft.weight.trim() !== '' && weightN === null ? 'Enter a weight between 30 and 300 kg.' : null
   const targetError = targetProvided && targetN === null ? 'Enter a target between 30 and 300 kg, or leave blank.' : null
@@ -360,7 +360,7 @@ export default function Awakening() {
                   </li>
                   <li className="flex gap-2">
                     <span className="mt-1 text-sky-400/80">◆</span>
-                    The System accepts Hunters aged 16 and above.
+                    The System accepts Hunters aged 18 and above.
                   </li>
                 </ul>
               </SystemPanel>

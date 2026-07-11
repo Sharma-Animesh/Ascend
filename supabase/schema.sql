@@ -19,7 +19,7 @@ create table if not exists public.profiles (
 create table if not exists public.assessments (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  age int check (age between 13 and 100),
+  age int check (age between 18 and 100),
   sex text,
   height_cm numeric,
   weight_kg numeric,
