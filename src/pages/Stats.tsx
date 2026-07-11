@@ -18,6 +18,7 @@ import { Emblem } from '../components/system/Emblem'
 import { InlineLoader } from '../components/system/Loader'
 import { EmptyState } from '../components/system/EmptyState'
 import { useAuth } from '../store/auth'
+import { effectiveStreak } from '../lib/streak'
 import { allocateStatPoint } from '../store/progress'
 import { RANKS, STAT_KEYS, STAT_META, archetypeById, classById, rankById } from '../lib/game'
 import type { StatKey } from '../lib/types'
@@ -166,7 +167,7 @@ export default function Stats() {
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <span className="flex items-center gap-1.5 text-sm font-bold text-orange-300">
               <Flame size={15} />
-              {character.streak} day streak
+              {effectiveStreak(character)} day streak
             </span>
             <span className="flex items-center gap-1.5 text-sm font-semibold text-mute">
               <Trophy size={14} className="text-gold" />

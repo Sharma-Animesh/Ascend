@@ -11,6 +11,7 @@ import {
   Sparkles,
   Swords,
   Target,
+  TreePine,
   Utensils,
   X,
   Zap,
@@ -19,12 +20,14 @@ import { supabase } from '../lib/supabase'
 import type { Announcement, Quest, QuestType } from '../lib/types'
 import { archetypeById, classById, rankById } from '../lib/game'
 import { ensureDailyQuests } from '../lib/quests'
+import { effectiveStreak } from '../lib/streak'
 import { useAuth } from '../store/auth'
 import { SystemPanel } from '../components/system/SystemPanel'
 import { XPBar } from '../components/system/XPBar'
 import { InlineLoader } from '../components/system/Loader'
 import { EmptyState } from '../components/system/EmptyState'
 import { Emblem } from '../components/system/Emblem'
+import { StreakTree } from '../components/StreakTree'
 
 const SEEN_KEY = 'ascend_seen_announcements'
 
@@ -241,7 +244,7 @@ export default function Dashboard() {
                   )}
                   <span className="flex items-center gap-1 text-[0.75rem] font-bold text-orange-300">
                     <Flame size={13} style={{ filter: 'drop-shadow(0 0 5px rgba(251,146,60,0.8))' }} />
-                    {character.streak} day{character.streak === 1 ? '' : 's'}
+                    {effectiveStreak(character)} day{effectiveStreak(character) === 1 ? '' : 's'}
                   </span>
                 </div>
               </div>
@@ -260,6 +263,13 @@ export default function Dashboard() {
               )}
             </div>
           </div>
+        </SystemPanel>
+      )}
+
+      {/* ---------- Streak Grove ---------- */}
+      {character && (
+        <SystemPanel title="Streak Grove" icon={<TreePine size={13} />}>
+          <StreakTree character={character} />
         </SystemPanel>
       )}
 

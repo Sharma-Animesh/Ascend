@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../../store/auth'
 import { rankById } from '../../lib/game'
+import { effectiveStreak } from '../../lib/streak'
 import { LogoMark, LogoWordmark } from '../system/Logo'
 import { XPBar } from '../system/XPBar'
 import { LevelUpModal } from '../system/LevelUpModal'
@@ -118,7 +119,7 @@ export function AppLayout() {
               <span style={{ color: rank?.color }}>{rank?.label}</span>
               <span className="text-mute">·</span>
               <span className="flex items-center gap-1 text-orange-300">
-                <Flame size={12} /> {character.streak}
+                <Flame size={12} /> {effectiveStreak(character)}
               </span>
             </div>
             <XPBar xp={character.xp} compact />
@@ -143,7 +144,7 @@ export function AppLayout() {
               </span>
               <span className="flex items-center gap-1 text-[0.72rem] font-bold text-orange-300">
                 <Flame size={13} />
-                {character.streak}
+                {effectiveStreak(character)}
               </span>
             </div>
           )}

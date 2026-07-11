@@ -22,6 +22,7 @@ import { InlineLoader } from '../components/system/Loader'
 import { supabase } from '../lib/supabase'
 import type { Measurement, WorkoutLog } from '../lib/types'
 import { useAuth } from '../store/auth'
+import { effectiveStreak } from '../lib/streak'
 import {
   AXIS_TICK,
   CHART_CYAN,
@@ -224,7 +225,7 @@ export default function Progress() {
       accent: '#38bdf8',
     },
     { label: 'Total XP', value: (character?.xp ?? 0).toLocaleString(), icon: Zap, accent: '#a78bfa' },
-    { label: 'Current streak', value: String(character?.streak ?? 0), icon: Flame, accent: '#fb923c' },
+    { label: 'Current streak', value: String(character ? effectiveStreak(character) : 0), icon: Flame, accent: '#fb923c' },
     { label: 'Longest streak', value: String(character?.longest_streak ?? 0), icon: Trophy, accent: '#fbbf24' },
   ]
 

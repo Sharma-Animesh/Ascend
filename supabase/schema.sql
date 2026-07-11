@@ -94,6 +94,8 @@ create table if not exists public.quests (
   created_at timestamptz not null default now()
 );
 create index if not exists quests_user_date_idx on public.quests (user_id, quest_date);
+-- Backstop against concurrent daily-quest generation (two devices, double-mount):
+create unique index if not exists quests_user_date_title_uidx on public.quests (user_id, quest_date, title);
 
 -- ---------- WORKOUT LOGS ----------
 create table if not exists public.workout_logs (
