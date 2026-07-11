@@ -1,0 +1,164 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-display: 'Orbitron', 'Rajdhani', system-ui, sans-serif;
+  --font-sans: 'Rajdhani', system-ui, sans-serif;
+
+  /* ASCEND system palette */
+  --color-void: #04060d; /* page background */
+  --color-abyss: #0a1120; /* raised background */
+  --color-panel: #0d1528; /* panel fill */
+  --color-line: #1c3452; /* hairline borders */
+  --color-glow: #38bdf8; /* primary system glow (cyan) */
+  --color-glow-soft: #7dd3fc;
+  --color-arc: #8b5cf6; /* violet accent */
+  --color-arc-soft: #a78bfa;
+  --color-ink: #e2e8f0; /* primary text */
+  --color-mute: #8ba3c7; /* secondary text */
+  --color-gold: #fbbf24; /* rank / reward accents */
+  --color-danger: #f87171;
+  --color-success: #4ade80;
+
+  --animate-pulse-glow: pulse-glow 2.6s ease-in-out infinite;
+  --animate-float: float 5s ease-in-out infinite;
+  --animate-shimmer: shimmer 2.2s linear infinite;
+  --animate-rise: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-spin-slow: spin 14s linear infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.55)); }
+  50% { opacity: 0.82; filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.9)); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to { background-position: 200% 0; }
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scan {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(100%); }
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-void text-ink font-sans;
+  font-size: 17px;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+/* ---------- System UI primitives ---------- */
+
+/* Glassmorphic system panel */
+.glass {
+  background: linear-gradient(160deg, rgba(20, 32, 58, 0.78), rgba(9, 15, 30, 0.86));
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    0 0 0 1px rgba(4, 10, 22, 0.6),
+    0 12px 40px rgba(2, 6, 16, 0.55),
+    inset 0 1px 0 rgba(125, 211, 252, 0.08);
+}
+
+/* Notched corners, like a system window */
+.clip-system {
+  clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+}
+
+.glow-border {
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  box-shadow:
+    0 0 12px rgba(56, 189, 248, 0.25),
+    inset 0 0 18px rgba(56, 189, 248, 0.07);
+}
+
+.text-glow {
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.65), 0 0 32px rgba(56, 189, 248, 0.3);
+}
+.text-glow-gold {
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.6), 0 0 30px rgba(251, 191, 36, 0.3);
+}
+
+/* Subtle scanline texture overlay — apply to a positioned container */
+.scanlines::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 3px,
+    rgba(125, 211, 252, 0.025) 3px,
+    rgba(125, 211, 252, 0.025) 4px
+  );
+  z-index: 1;
+}
+
+/* Faint grid backdrop */
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(56, 189, 248, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56, 189, 248, 0.045) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+/* Shimmering divider line */
+.shimmer-line {
+  background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.7), transparent);
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
+  height: 1px;
+}
+
+/* Safe-area helpers for notched phones / Android gesture bar */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* Hide scrollbars on carousels but keep scrollability */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Form controls in system style */
+.sys-input {
+  @apply w-full rounded-md border border-line bg-abyss/80 px-3.5 py-2.5 text-ink placeholder-mute/60 outline-none transition;
+}
+.sys-input:focus {
+  border-color: rgba(56, 189, 248, 0.6);
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35), 0 0 14px rgba(56, 189, 248, 0.15);
+}
+.sys-label {
+  @apply mb-1.5 block text-xs font-semibold tracking-[0.18em] text-mute uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
