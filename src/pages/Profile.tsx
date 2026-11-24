@@ -53,7 +53,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   )
 }
 
-/** Awakening-style option grid used by the RESPEC choosers. */
+/** Ascension-style option grid used by the RESPEC choosers. */
 function ChooserGrid<T extends { id: string; name: string; color: string }>({
   options,
   currentId,
@@ -151,7 +151,7 @@ export default function ProfilePage() {
     e.preventDefault()
     const name = nameDraft.trim()
     if (!name) {
-      setNameError('A Hunter needs a name.')
+      setNameError('An Ascendant needs a name.')
       return
     }
     setSavingName(true)
@@ -226,7 +226,7 @@ export default function ProfilePage() {
         <SystemPanel title="Account" icon={<User size={14} />} animate={false}>
           <div className="space-y-3">
             <div className="rounded-lg border border-line bg-abyss/40 p-3">
-              <p className="text-[0.6rem] font-semibold tracking-[0.25em] text-mute uppercase">Hunter Name</p>
+              <p className="text-[0.6rem] font-semibold tracking-[0.25em] text-mute uppercase">Ascendant Name</p>
               {editingName ? (
                 <form className="mt-1.5 flex items-center gap-1.5" onSubmit={saveName}>
                   <input
@@ -235,7 +235,7 @@ export default function ProfilePage() {
                     onChange={(e) => setNameDraft(e.target.value)}
                     maxLength={40}
                     autoFocus
-                    aria-label="Hunter name"
+                    aria-label="Ascendant name"
                   />
                   <button
                     type="submit"
@@ -260,7 +260,7 @@ export default function ProfilePage() {
               ) : (
                 <div className="flex items-center justify-between gap-2">
                   <p className="truncate font-display text-base font-bold text-ink">
-                    {profile.display_name || 'Unnamed Hunter'}
+                    {profile.display_name || 'Unnamed Ascendant'}
                   </p>
                   <button
                     type="button"
@@ -401,7 +401,7 @@ export default function ProfilePage() {
               {respecError && <p className="text-xs text-danger">{respecError}</p>}
             </div>
           ) : (
-            <p className="text-sm text-mute">No character data yet — complete your Awakening to forge one.</p>
+            <p className="text-sm text-mute">No character data yet — complete your Ascension to forge one.</p>
           )}
         </SystemPanel>
       </Rise>

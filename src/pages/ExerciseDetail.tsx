@@ -140,7 +140,7 @@ export default function ExerciseDetail() {
       ? `${exercise.default_sets} × ${exercise.default_reps}`
       : exercise.duration_sec
         ? formatDuration(exercise.duration_sec)
-        : "Hunter's discretion"
+        : "Ascendant's discretion"
     : ''
 
   const handleLog = async () => {
@@ -192,7 +192,7 @@ export default function ExerciseDetail() {
       if (flashTimer.current !== null) window.clearTimeout(flashTimer.current)
       flashTimer.current = window.setTimeout(() => setFlash(null), 4500)
     } catch (e) {
-      setLogError(e instanceof Error ? e.message : 'The System could not record this log. Try again, Hunter.')
+      setLogError(e instanceof Error ? e.message : 'The System could not record this log. Try again, Ascendant.')
     } finally {
       setSubmitting(false)
     }
@@ -361,7 +361,7 @@ export default function ExerciseDetail() {
             <div className="space-y-4">
               <p className="text-sm text-mute">
                 Record a completed session and the System will credit your growth.
-                {prescription !== "Hunter's discretion" && (
+                {prescription !== "Ascendant's discretion" && (
                   <>
                     {' '}
                     Prescribed: <span className="font-semibold text-glow-soft">{prescription}</span>.

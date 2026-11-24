@@ -20,14 +20,13 @@ import { supabase } from '../lib/supabase'
 import type { Announcement, Quest, QuestType } from '../lib/types'
 import { archetypeById, classById, rankById } from '../lib/game'
 import { ensureDailyQuests } from '../lib/quests'
-import { effectiveStreak } from '../lib/streak'
+import { effectiveStreak, groveState } from '../lib/streak'
 import { useAuth } from '../store/auth'
 import { SystemPanel } from '../components/system/SystemPanel'
 import { XPBar } from '../components/system/XPBar'
 import { InlineLoader } from '../components/system/Loader'
 import { EmptyState } from '../components/system/EmptyState'
 import { Emblem } from '../components/system/Emblem'
-import { StreakTree } from '../components/StreakTree'
 
 const SEEN_KEY = 'ascend_seen_announcements'
 
@@ -184,7 +183,7 @@ export default function Dashboard() {
       >
         <p className="font-display text-[0.6rem] font-bold tracking-[0.35em] text-mute uppercase">{today}</p>
         <h1 className="mt-1 font-display text-xl font-black tracking-[0.08em] text-ink uppercase sm:text-2xl">
-          Welcome back, Hunter{' '}
+          Welcome back, Ascendant{' '}
           <span className="text-glow-soft text-glow">{profile?.display_name ?? ''}</span>
         </h1>
         <p className="mt-1 text-sm text-mute">The System has logged your return. Today’s directives await.</p>
@@ -218,7 +217,7 @@ export default function Dashboard() {
 
       {/* ---------- Character panel ---------- */}
       {character && (
-        <SystemPanel title="Hunter Status" icon={<Sparkles size={13} />}>
+        <SystemPanel title="Ascendant Status" icon={<Sparkles size={13} />}>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
             <div className="flex items-center gap-4">
               <Emblem id={arch?.id ?? cls?.id ?? 'blade'} size={64} active />
@@ -267,11 +266,47 @@ export default function Dashboard() {
       )}
 
       {/* ---------- Streak Grove ---------- */}
-      {character && (
-        <SystemPanel title="Streak Grove" icon={<TreePine size={13} />}>
-          <StreakTree character={character} />
-        </SystemPanel>
-      )}
+      {character &&
+        (() => {
+          const grove = groveState(character)
+          const tint =
+            grove.health === 'healthy' ? '#4ade80' : grove.health === 'thirsty' ? '#fbbf24' : '#8ba3c7'
+          return (
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: easeOut }}
+            >
+              <Link
+                to="/app/grove"
+                className="glass clip-system group flex min-h-[44px] items-center gap-3 rounded-lg px-3.5 py-3 transition-all hover:border-emerald-400/40 hover:shadow-[0_0_16px_rgba(74,222,128,0.15)] sm:px-4"
+              >
+                <TreePine
+                  size={20}
+                  className="shrink-0"
+                  style={{ color: tint, filter: `drop-shadow(0 0 6px ${tint}99)` }}
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-display text-[0.72rem] font-bold tracking-[0.16em] text-ink uppercase">
+                    {effectiveStreak(character)} day streak · {grove.stageName}
+                  </p>
+                  <p className="truncate text-[0.7rem] text-mute">
+                    {grove.nextMilestone
+                      ? `Next: ${grove.nextMilestone.label} at day ${grove.nextMilestone.at}`
+                      : 'The grove stands complete.'}
+                  </p>
+                </div>
+                <span className="shrink-0 font-display text-[0.6rem] font-bold tracking-[0.2em] text-sky-300 uppercase transition group-hover:text-sky-200">
+                  View grove
+                </span>
+                <ChevronRight
+                  size={16}
+                  className="shrink-0 text-mute transition group-hover:translate-x-0.5 group-hover:text-sky-300"
+                />
+              </Link>
+            </motion.div>
+          )
+        })()}
 
       {/* ---------- Today's quests ---------- */}
       <SystemPanel title="Today’s Quests" icon={<Swords size={13} />}>

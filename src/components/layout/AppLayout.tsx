@@ -9,6 +9,7 @@ import {
   Radar,
   ShieldCheck,
   Target,
+  TreePine,
   UserCircle2,
   Users,
   Utensils,
@@ -29,6 +30,7 @@ const NAV = [
 ]
 
 const SECONDARY = [
+  { to: '/app/grove', label: 'Grove', icon: TreePine },
   { to: '/app/goals', label: 'Goals', icon: Target },
   { to: '/app/progress', label: 'Progress', icon: LineChart },
 ]
@@ -36,7 +38,7 @@ const SECONDARY = [
 const ADMIN = [
   { to: '/app/admin', label: 'Overview', icon: ShieldCheck, end: true },
   { to: '/app/admin/exercises', label: 'Exercises', icon: Dumbbell, end: false },
-  { to: '/app/admin/users', label: 'Hunters', icon: Users, end: false },
+  { to: '/app/admin/users', label: 'Ascendants', icon: Users, end: false },
   { to: '/app/admin/announcements', label: 'Broadcasts', icon: Megaphone, end: false },
 ]
 
@@ -106,7 +108,7 @@ export function AppLayout() {
         {character && (
           <div className="border-t border-line/60 p-4">
             <div className="mb-1 flex items-center justify-between">
-              <span className="truncate text-sm font-bold text-ink">{profile?.display_name ?? 'Hunter'}</span>
+              <span className="truncate text-sm font-bold text-ink">{profile?.display_name ?? 'Ascendant'}</span>
               <button
                 onClick={handleSignOut}
                 title="Sign out"

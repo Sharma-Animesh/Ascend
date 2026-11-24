@@ -41,7 +41,7 @@ const PARTICLES = Array.from({ length: 28 }, (_, i) => ({
 
 const SAMPLE_OBJECTIVES = [
   { label: 'Push-ups — 3 × 12', done: true },
-  { label: 'Shadow squats — 3 × 15', done: true },
+  { label: 'Bodyweight squats — 3 × 15', done: true },
   { label: 'Box breathing — 5 min', done: false },
 ]
 
@@ -114,17 +114,27 @@ export default function Landing() {
             className="text-glow mt-4 font-display text-[1.65rem] leading-tight font-black tracking-[0.08em] text-ink uppercase sm:text-5xl lg:text-[3.3rem]"
           >
             Your body is <br className="hidden sm:block" />
-            <span className="bg-gradient-to-r from-sky-300 via-white to-violet-300 bg-clip-text text-transparent">
+            <span
+              className="glow-clip inline-block"
+              style={{
+                backgroundImage: 'linear-gradient(90deg, #7dd3fc 0%, #ffffff 50%, #c4b5fd 100%)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                color: 'transparent',
+                WebkitTextFillColor: 'transparent',
+                paddingBottom: '0.08em',
+              }}
+            >
               the character.
             </span>
           </motion.h1>
           <motion.p variants={rise} className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-mute sm:text-lg">
-            Real training. RPG progression. Awaken, take quests, gain stats, rank up from{' '}
-            <span className="text-glow-soft">E</span> to <span className="text-gold">Sovereign</span>.
+            Real training. RPG progression. Ascend, take quests, gain stats, rank up from{' '}
+            <span className="text-glow-soft">E</span> to <span className="text-gold">Zenith</span>.
           </motion.p>
           <motion.div variants={rise} className="mt-9 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
             <GlowButton size="lg" icon={<ArrowRight size={16} />} onClick={() => navigate('/register')}>
-              Begin Awakening
+              Begin Ascension
             </GlowButton>
             <GlowButton size="lg" variant="ghost" onClick={() => navigate('/login')}>
               I have an account
@@ -240,7 +250,7 @@ export default function Landing() {
             <motion.div variants={rise}>
               <SystemPanel animate={false} title="Rank Trials" icon={<ChevronsUp size={14} />} className="h-full">
                 <p className="text-sm leading-relaxed text-mute">
-                  Prove your progression in trial gates from E-Rank all the way to Sovereign. Each rank opens harder
+                  Prove your progression in trial gates from E-Rank all the way to Zenith. Each rank opens harder
                   quests and greater rewards.
                 </p>
                 <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
@@ -297,14 +307,14 @@ export default function Landing() {
             variants={rise}
             className="text-glow font-display text-xl leading-snug font-black tracking-[0.12em] text-ink uppercase sm:text-3xl"
           >
-            The System has noticed you, <span className="text-sky-300">Hunter</span>.
+            The System has noticed you, <span className="text-sky-300">Ascendant</span>.
           </motion.h2>
           <motion.p variants={rise} className="mt-4 text-mute">
             Your record begins at E-Rank. Where it ends is up to you.
           </motion.p>
           <motion.div variants={rise} className="mt-8 flex justify-center">
             <GlowButton size="lg" icon={<ArrowRight size={16} />} onClick={() => navigate('/register')}>
-              Begin Awakening
+              Begin Ascension
             </GlowButton>
           </motion.div>
         </motion.div>
@@ -318,7 +328,7 @@ export default function Landing() {
           </div>
           <p className="mx-auto mt-4 max-w-2xl text-xs leading-relaxed text-mute">
             ASCEND provides general fitness information, not medical advice. Consult a physician before starting.
-            Ages 18+.
+            Ages 16+.
           </p>
           <p className="mt-2 text-[0.68rem] text-mute/70">
             All characters, emblems and artwork in ASCEND are original creations. © {new Date().getFullYear()} ASCEND.

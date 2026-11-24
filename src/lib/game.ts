@@ -68,7 +68,7 @@ export const RANKS: RankDef[] = [
   { id: 'B', label: 'B-Rank', minLevel: 16, color: '#a78bfa' },
   { id: 'A', label: 'A-Rank', minLevel: 23, color: '#e879f9' },
   { id: 'S', label: 'S-Rank', minLevel: 31, color: '#fbbf24' },
-  { id: 'SOV', label: 'Sovereign', minLevel: 40, color: '#f8fafc' },
+  { id: 'SOV', label: 'Zenith', minLevel: 40, color: '#f8fafc' },
 ]
 
 export function rankForLevel(level: number): RankDef {
@@ -131,9 +131,9 @@ export const CLASSES: ClassDef[] = [
   },
   {
     id: 'shadow',
-    name: 'Shadow',
-    tagline: 'Technique is truth.',
-    desc: 'Martial-arts specialist — striking fundamentals, footwork and fight conditioning.',
+    name: 'Ronin',
+    tagline: 'The wandering blade.',
+    desc: 'Wandering martial artist — striking fundamentals, footwork and fight conditioning, honed on the road.',
     statBias: ['TEC', 'AGI'],
     categories: ['martial', 'calisthenics'],
     color: '#a78bfa',
@@ -222,9 +222,9 @@ export function archetypeById(id: string | null): ArchetypeDef | undefined {
 
 // ---------- Titles ----------
 export const TITLE_RULES: Array<{ id: string; title: string; check: (c: { level: number; streak: number; longest_streak: number }) => boolean }> = [
-  { id: 'awakened', title: 'The Awakened', check: () => true },
+  { id: 'awakened', title: 'The Ascended', check: () => true },
   { id: 'iron-willed', title: 'Iron-Willed', check: (c) => c.longest_streak >= 7 },
   { id: 'relentless', title: 'Relentless', check: (c) => c.longest_streak >= 30 },
   { id: 'ascendant', title: 'Ascendant', check: (c) => c.level >= 10 },
-  { id: 'apex', title: 'Apex Hunter', check: (c) => c.level >= 25 },
+  { id: 'apex', title: 'Apex Ascendant', check: (c) => c.level >= 25 },
 ]

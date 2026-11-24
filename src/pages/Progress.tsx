@@ -235,7 +235,7 @@ export default function Progress() {
         <h1 className="font-display text-lg font-black tracking-[0.3em] text-glow-soft uppercase text-glow">
           Progress Log
         </h1>
-        <p className="mt-0.5 text-sm text-mute">Every rep is recorded, Hunter. The climb is visible here.</p>
+        <p className="mt-0.5 text-sm text-mute">Every rep is recorded, Ascendant. The climb is visible here.</p>
       </motion.div>
 
       {loadError && (
@@ -393,7 +393,7 @@ export default function Progress() {
           <EmptyState
             icon={<History size={28} />}
             title="No activity yet"
-            hint="Your first completed training will appear here. The System awaits, Hunter."
+            hint="Your first completed training will appear here. The System awaits, Ascendant."
           />
         ) : (
           <motion.ul variants={listVariants} initial="hidden" animate="show" className="space-y-2">

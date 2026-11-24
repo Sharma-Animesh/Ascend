@@ -2,7 +2,7 @@
 
 You are building one feature area of **ASCEND: The Fitness System** — an anime-RPG-styled fitness
 app (glowing "System" UI: dark navy, cyan glow, violet accents). Real fitness underneath: workouts,
-nutrition, safety-first. Users are addressed as **"Hunter"**; the app's voice is a calm, supportive
+nutrition, safety-first. Users are addressed as **"Ascendant"**; the app's voice is a calm, supportive
 "System" (e.g. "The System has assigned today's training"). NEVER shame the user; encouraging tone only.
 
 ## Hard rules

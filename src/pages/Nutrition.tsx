@@ -5,6 +5,7 @@ import {
   Crosshair,
   Drumstick,
   Flame,
+  Globe,
   Leaf,
   Moon,
   NotebookPen,
@@ -23,7 +24,8 @@ import { InlineLoader } from '../components/system/Loader'
 import { EmptyState } from '../components/system/EmptyState'
 import { supabase } from '../lib/supabase'
 import { macroTargets } from '../lib/tdee'
-import { MEAL_PLANS, type MealPlanDay } from '../lib/mealplans'
+import { MEAL_PLANS, type MealPlanDay, type MealPlanDiet } from '../lib/mealplans'
+import { REGION_LABELS, regionForCountry, type CuisineRegion } from '../lib/regions'
 import { useAuth } from '../store/auth'
 import type { Assessment, FoodLog, MealType } from '../lib/types'
 
@@ -39,13 +41,30 @@ const MEAL_META: Record<MealType, { label: string; Icon: LucideIcon }> = {
   other: { label: 'Other', Icon: UtensilsCrossed },
 }
 
-type DietKey = keyof typeof MEAL_PLANS
+type DietKey = MealPlanDiet
 
 const DIET_TABS: Array<{ id: DietKey; label: string; Icon: LucideIcon }> = [
   { id: 'veg', label: 'Veg', Icon: Leaf },
   { id: 'nonveg', label: 'Non-Veg', Icon: Drumstick },
   { id: 'vegan', label: 'Vegan', Icon: Sprout },
 ]
+
+// Cuisine browsing: defaults from the country picked at Awakening, but the
+// The Ascendant may browse any region — a manual pick is remembered locally.
+const CUISINE_STORAGE_KEY = 'ascend_cuisine_region'
+const REGION_ORDER = Object.keys(REGION_LABELS) as CuisineRegion[]
+
+/** The assessments row carries a `country` code column that the shared Assessment type doesn't declare yet. */
+type AssessmentRow = Assessment & { country?: string | null }
+
+function storedCuisine(): CuisineRegion | null {
+  try {
+    const v = localStorage.getItem(CUISINE_STORAGE_KEY)
+    return v && v in REGION_LABELS ? (v as CuisineRegion) : null
+  } catch {
+    return null
+  }
+}
 
 const todayStr = () => new Date().toISOString().slice(0, 10)
 
@@ -168,6 +187,7 @@ export default function Nutrition() {
   const [actionError, setActionError] = useState<string | null>(null)
 
   const [diet, setDiet] = useState<DietKey>('veg')
+  const [cuisine, setCuisine] = useState<CuisineRegion>(() => storedCuisine() ?? 'international')
 
   const [form, setForm] = useState<{ name: string; meal: MealType; calories: string; protein: string; carbs: string; fat: string }>({
     ...EMPTY_FORM,
@@ -187,6 +207,7 @@ export default function Nutrition() {
       const [aRes, lRes] = await Promise.all([
         supabase
           .from('assessments')
+          // '*' includes the country column (added for cuisine defaults)
           .select('*')
           .eq('user_id', userId)
           .order('created_at', { ascending: false })
@@ -201,9 +222,11 @@ export default function Nutrition() {
       ])
       if (cancelled) return
       if (aRes.error || lRes.error) setLoadError('The System could not sync your nutrition data. Refresh to try again.')
-      const a = (aRes.data as Assessment | null) ?? null
+      const a = (aRes.data as AssessmentRow | null) ?? null
       setAssessment(a)
       if (a?.diet_pref === 'veg' || a?.diet_pref === 'nonveg' || a?.diet_pref === 'vegan') setDiet(a.diet_pref)
+      // A manual cuisine pick (persisted locally) beats the country default.
+      setCuisine(storedCuisine() ?? regionForCountry(a?.country ?? null))
       setLogs((lRes.data as FoodLog[] | null) ?? [])
       setLoading(false)
     })()
@@ -248,7 +271,7 @@ export default function Nutrition() {
     const name = form.name.trim()
     const calories = Number(form.calories)
     if (!name) {
-      setFormError('Name the food, Hunter.')
+      setFormError('Name the food, Ascendant.')
       return
     }
     if (form.calories.trim() === '' || !Number.isFinite(calories) || calories < 0) {
@@ -278,6 +301,15 @@ export default function Nutrition() {
     }
     setLogs((prev) => [...prev, data as FoodLog])
     setForm((f) => ({ ...EMPTY_FORM, meal: f.meal }))
+  }
+
+  function selectCuisine(region: CuisineRegion) {
+    setCuisine(region)
+    try {
+      localStorage.setItem(CUISINE_STORAGE_KEY, region)
+    } catch {
+      // Storage unavailable — the choice still applies for this session.
+    }
   }
 
   async function deleteLog(id: string) {
@@ -505,6 +537,33 @@ export default function Nutrition() {
 
       {/* ---------- MEAL PLAN ---------- */}
       <SystemPanel title="Meal Plan" icon={<Salad size={14} />}>
+        {/* cuisine selector */}
+        <div className="mb-2 flex items-center gap-1.5">
+          <Globe size={12} className="text-sky-300/80" />
+          <span className="font-display text-[0.6rem] font-bold tracking-[0.24em] text-mute uppercase">Cuisine</span>
+        </div>
+        <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-1" role="group" aria-label="Cuisine region">
+          {REGION_ORDER.map((r) => {
+            const active = cuisine === r
+            return (
+              <button
+                key={r}
+                type="button"
+                onClick={() => selectCuisine(r)}
+                aria-pressed={active}
+                className={`min-h-11 shrink-0 rounded-full border px-4 font-display text-[0.6rem] font-bold tracking-[0.16em] whitespace-nowrap uppercase transition-all ${
+                  active
+                    ? 'glow-border bg-sky-500/15 text-sky-200'
+                    : 'border-line bg-abyss/60 text-mute hover:border-sky-400/40 hover:text-glow-soft'
+                }`}
+              >
+                {REGION_LABELS[r]}
+              </button>
+            )
+          })}
+        </div>
+        <p className="mt-2 mb-4 text-xs text-mute">Defaulted from your country — browse any cuisine, fuel is fuel.</p>
+
         <div className="flex gap-2">
           {DIET_TABS.map((t) => {
             const active = diet === t.id
@@ -536,8 +595,8 @@ export default function Nutrition() {
           .
         </p>
 
-        <div key={diet} className="mt-4 grid gap-4 md:grid-cols-2">
-          {MEAL_PLANS[diet].map((day, i) => (
+        <div key={`${cuisine}-${diet}`} className="mt-4 grid gap-4 md:grid-cols-2">
+          {MEAL_PLANS[cuisine][diet].map((day, i) => (
             <MealPlanCard key={day.label} day={day} index={i} />
           ))}
         </div>

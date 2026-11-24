@@ -420,7 +420,7 @@ export default function Goals() {
         patch(data as Goal)
       }
     } catch {
-      setError('The System could not save that update. Try again, Hunter.')
+      setError('The System could not save that update. Try again, Ascendant.')
     }
   }
 
@@ -463,7 +463,7 @@ export default function Goals() {
         }
       >
         <p className="mb-4 text-sm text-mute">
-          Long-horizon vows, Hunter. The System records each one and holds it until fulfilled.
+          Long-horizon vows, Ascendant. The System records each one and holds it until fulfilled.
         </p>
 
         <AnimatePresence initial={false}>
@@ -569,7 +569,7 @@ export default function Goals() {
               title={done.length > 0 ? 'All resolutions fulfilled' : 'No resolutions yet'}
               hint={
                 done.length > 0
-                  ? 'Impressive, Hunter. Declare the next objective when you are ready.'
+                  ? 'Impressive, Ascendant. Declare the next objective when you are ready.'
                   : '“Every ascent begins with a vow.” Declare one, and the System will hold you to it — gently.'
               }
               action={

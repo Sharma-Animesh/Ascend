@@ -227,7 +227,7 @@ export default function QuestPlayer() {
           <EmptyState
             icon={<Compass size={32} />}
             title="Quest not found"
-            hint="This directive does not exist in your record — it may have expired or belongs to another Hunter."
+            hint="This directive does not exist in your record — it may have expired or belongs to another Ascendant."
             action={
               <Link to="/app">
                 <GlowButton variant="ghost" icon={<ArrowLeft size={15} />}>
@@ -268,7 +268,7 @@ export default function QuestPlayer() {
                 +{quest.xp_reward} XP
               </p>
               <p className="mt-2 font-display text-sm font-bold tracking-[0.28em] text-ink uppercase">
-                Quest cleared, Hunter.
+                Quest cleared, Ascendant.
               </p>
               <p className="mt-1 text-sm text-mute">
                 {justCleared
@@ -462,7 +462,7 @@ export default function QuestPlayer() {
         </GlowButton>
         {!allDone && (
           <p className="text-center text-[0.75rem] text-mute">
-            Clear all objectives to claim your reward, Hunter.
+            Clear all objectives to claim your reward, Ascendant.
           </p>
         )}
       </motion.div>

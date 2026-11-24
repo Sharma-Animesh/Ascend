@@ -93,6 +93,13 @@ body {
   text-shadow: 0 0 10px rgba(251, 191, 36, 0.6), 0 0 30px rgba(251, 191, 36, 0.3);
 }
 
+/* Glow for bg-clip-text gradient headlines — text-shadow bleeds through
+   the transparent fill, so use a pixel-accurate drop-shadow instead */
+.glow-clip {
+  text-shadow: none;
+  filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.4));
+}
+
 /* Subtle scanline texture overlay — apply to a positioned container */
 .scanlines::before {
   content: '';

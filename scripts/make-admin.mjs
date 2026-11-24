@@ -1,7 +1,7 @@
 // Promote an existing account (sign up in the app first) to admin.
 // Usage: SUPABASE_ACCESS_TOKEN=sbp_xxx node scripts/make-admin.mjs you@example.com
 const token = process.env.SUPABASE_ACCESS_TOKEN
-const ref = process.env.SUPABASE_PROJECT_REF || 'gzljmdgwnmrvsjtvnoqt'
+const ref = process.env.SUPABASE_PROJECT_REF || 'wlvwdmsumubjqvgqatdj'
 const email = process.argv[2]
 if (!token || !email) {
   console.error('Usage: SUPABASE_ACCESS_TOKEN=... node scripts/make-admin.mjs <email>')

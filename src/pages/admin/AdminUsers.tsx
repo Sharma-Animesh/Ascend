@@ -35,7 +35,7 @@ export default function AdminUsers() {
       .select('*')
       .order('created_at', { ascending: false })
     if (pErr) {
-      setError('The System could not load the Hunter registry.')
+      setError('The System could not load the Ascendant registry.')
       return
     }
     const list = (profiles as Profile[] | null) ?? []
@@ -49,7 +49,7 @@ export default function AdminUsers() {
           list.map((p) => p.id),
         )
       if (cErr) {
-        setError('The System could not load Hunter character data.')
+        setError('The System could not load Ascendant character data.')
         return
       }
       characters = (chars as CharacterProfile[] | null) ?? []
@@ -97,9 +97,9 @@ export default function AdminUsers() {
       >
         <h1 className="flex items-center gap-2.5 font-display text-base font-bold tracking-[0.28em] text-gold uppercase text-glow-gold sm:text-lg">
           <Users size={20} className="shrink-0" />
-          Hunter Registry
+          Ascendant Registry
         </h1>
-        <p className="mt-1 text-sm text-mute">Every awakened Hunter, and who holds administrator authority.</p>
+        <p className="mt-1 text-sm text-mute">Every Ascendant on record, and who holds administrator authority.</p>
       </motion.header>
 
       {error && (
@@ -117,15 +117,15 @@ export default function AdminUsers() {
         <input
           value={search}
           onChange={(e: ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
-          placeholder="Search Hunters by name…"
+          placeholder="Search Ascendants by name…"
           className="sys-input pl-10"
-          aria-label="Search Hunters by name"
+          aria-label="Search Ascendants by name"
         />
       </motion.div>
 
       {/* List */}
       <SystemPanel
-        title="Hunters"
+        title="Ascendants"
         icon={<Users size={14} className="text-gold" />}
         action={
           filtered && (
@@ -140,8 +140,8 @@ export default function AdminUsers() {
         ) : !filtered || filtered.length === 0 ? (
           <EmptyState
             icon={<Users size={30} />}
-            title="No Hunters found"
-            hint={search ? 'No Hunter matches that name.' : 'New Hunters will appear here as they awaken.'}
+            title="No Ascendants found"
+            hint={search ? 'No Ascendant matches that name.' : 'New Ascendants will appear here as they ascend.'}
           />
         ) : (
           <ul className="divide-y divide-line/50">
@@ -165,13 +165,13 @@ export default function AdminUsers() {
                       isAdmin ? 'border-gold/50 bg-gold/10 text-gold' : 'border-line bg-abyss text-glow-soft'
                     }`}
                   >
-                    {(profile.display_name ?? 'H').slice(0, 1).toUpperCase()}
+                    {(profile.display_name ?? 'A').slice(0, 1).toUpperCase()}
                   </span>
 
                   <div className="min-w-0 flex-1">
                     <p className="flex items-center gap-2">
                       <span className="truncate text-sm font-bold text-ink">
-                        {profile.display_name ?? 'Unnamed Hunter'}
+                        {profile.display_name ?? 'Unnamed Ascendant'}
                       </span>
                       {isAdmin && (
                         <span className="shrink-0 rounded-full border border-gold/50 bg-gold/10 px-2 py-px font-display text-[0.52rem] font-bold tracking-[0.2em] text-gold uppercase">
@@ -204,7 +204,7 @@ export default function AdminUsers() {
                           </span>
                         </>
                       ) : (
-                        <span>Unawakened</span>
+                        <span>Unascended</span>
                       )}
                       <span className="text-mute/50">·</span>
                       <span>

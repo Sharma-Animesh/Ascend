@@ -62,7 +62,7 @@ export default function Stats() {
           <EmptyState
             icon={<UserCircle2 size={30} />}
             title="No character detected"
-            hint="Complete the Awakening and the System will forge your Hunter profile."
+            hint="Complete the Ascension and the System will forge your Ascendant profile."
           />
         </SystemPanel>
       </div>
@@ -103,11 +103,11 @@ export default function Stats() {
         <h1 className="font-display text-lg font-black tracking-[0.3em] text-glow-soft uppercase text-glow">
           Status Window
         </h1>
-        <p className="mt-0.5 text-sm text-mute">The System's official record of your ascent, Hunter.</p>
+        <p className="mt-0.5 text-sm text-mute">The System's official record of your climb, Ascendant.</p>
       </motion.div>
 
       {/* ---------- Character header ---------- */}
-      <SystemPanel title="Hunter Profile" icon={<UserCircle2 size={13} />}>
+      <SystemPanel title="Ascendant Profile" icon={<UserCircle2 size={13} />}>
         <div className="space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-5">
             <div className="flex items-center gap-3">

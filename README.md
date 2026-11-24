@@ -1,9 +1,9 @@
 # ASCEND — The Fitness System
 
 An anime-RPG-styled fitness app: real training programs wrapped in a glowing "System" interface.
-Users **awaken**, get assessed, receive a **Rank** and **Class**, complete daily **Quests** (real
+Users **ascend**, get assessed, receive a **Rank** and **Class**, complete daily **Quests** (real
 workouts), gain **XP and stats** (STR / AGI / VIT / END / FLX / BRE / TEC), and climb the ranks
-from **E to Sovereign** — while tracking nutrition, goals, and progress underneath.
+from **E to Zenith** — while tracking nutrition, goals, and progress underneath.
 
 One TypeScript codebase, three targets:
 
@@ -44,7 +44,7 @@ is [supabase/seed_exercises.sql](supabase/seed_exercises.sql). Apply either with
 SUPABASE_ACCESS_TOKEN=sbp_... node scripts/db-apply.mjs supabase/schema.sql
 ```
 
-Key tables: `profiles` (role: user/admin), `assessments` (Awakening data + health screen),
+Key tables: `profiles` (role: user/admin), `assessments` (Ascension onboarding data + health screen),
 `character_profiles` (level/XP/rank/class/archetype/stats/streak), `exercises`, `quests`,
 `workout_logs`, `food_logs`, `goals`, `measurements`, `announcements`.
 
@@ -110,7 +110,7 @@ android/        Capacitor Android project
 
 ## Safety & content principles (implemented, per PRD)
 
-- Health screen (PAR-Q style) during Awakening; "not medical advice" disclaimers on onboarding and nutrition.
+- Health screen (PAR-Q style) during Ascension; "not medical advice" disclaimers on onboarding and nutrition.
 - Calorie targets enforce safe floors (1200/1500 kcal) and cap deficits at 20%; supportive language only.
 - Breathwork: conservative durations only, persistent "never near water / while driving, stop if dizzy" warnings.
 - Martial content framed as technique/fitness/self-defense fundamentals; "spar only under a qualified coach."

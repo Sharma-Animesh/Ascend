@@ -1,5 +1,5 @@
 // Streak Grove math: how the tree grows with the streak and how it fades
-// when the Hunter is away. Pure functions — the visual lives in
+// when the Ascendant is away. Pure functions — the visual lives in
 // components/StreakTree.tsx.
 import type { CharacterProfile } from './types'
 
@@ -133,7 +133,7 @@ export function groveState(
     message:
       raw >= 100
         ? treesFor(raw) >= 4
-          ? 'Your grove stands complete. Legendary discipline, Hunter.'
+          ? 'Your grove stands complete. Legendary discipline, Ascendant.'
           : 'A sacred grove. Every 50 days another tree takes root.'
         : 'Your discipline is alive. It grows a little every single day.',
     daysSinceActivity: ds,

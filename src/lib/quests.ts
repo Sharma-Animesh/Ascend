@@ -42,7 +42,7 @@ function objectiveFor(ex: Exercise): QuestObjective {
 // ---------- Daily Challenge ----------
 // A fixed baseline every trainee receives daily ("10 push-ups, 20 sit-ups,
 // 1 km run" style). Quantities scale with level tier; the task mix switches
-// with the Hunter's training focus (class first, then archetype).
+// with the Ascendant's training focus (class first, then archetype).
 
 type ChallengeFocus = 'balanced' | 'strength' | 'agility' | 'martial' | 'calm'
 

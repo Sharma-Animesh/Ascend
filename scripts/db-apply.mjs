@@ -3,7 +3,7 @@
 import { readFileSync } from 'node:fs'
 
 const token = process.env.SUPABASE_ACCESS_TOKEN
-const ref = process.env.SUPABASE_PROJECT_REF || 'gzljmdgwnmrvsjtvnoqt'
+const ref = process.env.SUPABASE_PROJECT_REF || 'wlvwdmsumubjqvgqatdj'
 const file = process.argv[2]
 if (!token || !file) {
   console.error('Usage: SUPABASE_ACCESS_TOKEN=... node scripts/db-apply.mjs <file.sql>')

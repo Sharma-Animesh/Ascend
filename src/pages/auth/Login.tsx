@@ -75,7 +75,7 @@ export default function Login() {
   }
 
   return (
-    <AuthFrame eyebrow="Identify yourself, Hunter" title="System Access">
+    <AuthFrame eyebrow="Identify yourself, Ascendant" title="System Access">
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         {error && (
           <div role="alert" className="rounded-md border border-danger/40 bg-red-950/30 px-3.5 py-3">
@@ -98,7 +98,7 @@ export default function Login() {
             className="sys-input"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="hunter@example.com"
+            placeholder="ascendant@example.com"
             autoComplete="email"
             required
           />
@@ -136,7 +136,7 @@ export default function Login() {
         <p>
           No record yet?{' '}
           <Link to="/register" className="text-sky-300 underline-offset-4 transition hover:text-sky-200 hover:underline">
-            Begin your Awakening
+            Begin your Ascension
           </Link>
         </p>
         <p>

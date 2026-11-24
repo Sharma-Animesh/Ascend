@@ -6,6 +6,7 @@ import { SystemPanel } from '../../components/system/SystemPanel'
 import { GlowButton } from '../../components/system/GlowButton'
 import { LogoMark } from '../../components/system/Logo'
 import { supabase } from '../../lib/supabase'
+import { isNative } from '../../lib/native'
 
 const EASE = [0.22, 1, 0.36, 1] as const
 
@@ -72,7 +73,7 @@ export default function Register() {
   const [detail, setDetail] = useState<string | null>(null)
 
   function validate(): string | null {
-    if (displayName.trim().length < 2) return 'Choose a Hunter name of at least 2 characters.'
+    if (displayName.trim().length < 2) return 'Choose an Ascendant name of at least 2 characters.'
     if (password.length < 8) return 'Your access key must be at least 8 characters long.'
     if (password !== confirm) return 'The two access keys do not match.'
     if (!agreed) return 'Please confirm the acknowledgement below to proceed.'
@@ -95,14 +96,18 @@ export default function Register() {
     const { data, error: err } = await supabase.auth.signUp({
       email: email.trim(),
       password,
-      options: { data: { display_name: displayName.trim() } },
+      options: {
+        data: { display_name: displayName.trim() },
+        // Native app: deep link back into ASCEND. Browser: hosted callback page.
+        emailRedirectTo: isNative ? 'ascend://auth/callback' : `${window.location.origin}/auth/callback`,
+      },
     })
 
     if (err) {
       if (/already registered|already exists|already been registered/i.test(err.message)) {
         setAlready(true)
       } else {
-        setError('The Awakening could not be completed. Adjust and try again.')
+        setError('The Ascension could not be completed. Adjust and try again.')
         setDetail(err.message)
       }
       setLoading(false)
@@ -133,7 +138,7 @@ export default function Register() {
 
   if (sent) {
     return (
-      <AuthFrame eyebrow="Awakening Protocol" title="Transmission Sent">
+      <AuthFrame eyebrow="Ascension Protocol" title="Transmission Sent">
         <motion.div
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -146,7 +151,7 @@ export default function Register() {
           <p className="mt-5 text-sm leading-relaxed text-mute">
             A confirmation signal has been dispatched to{' '}
             <span className="font-semibold text-ink">{email.trim()}</span>. Open the link inside to verify your
-            record, then return and log in to complete your Awakening.
+            record, then return and log in to complete your Ascension.
           </p>
           <p className="mt-3 text-xs text-mute/70">
             No signal received? Check your spam folder — transmissions sometimes drift.
@@ -160,7 +165,7 @@ export default function Register() {
   }
 
   return (
-    <AuthFrame eyebrow="New Hunter Registration" title="Awakening Protocol">
+    <AuthFrame eyebrow="New Ascendant Registration" title="Ascension Protocol">
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         {already && (
           <div role="alert" className="rounded-md border border-sky-400/40 bg-sky-950/30 px-3.5 py-3">
@@ -168,7 +173,7 @@ export default function Register() {
               System Notice — Record Exists
             </p>
             <p className="mt-1 text-sm leading-snug text-sky-100/85">
-              This email is already bound to an awakened Hunter.{' '}
+              This email is already bound to an Ascendant.{' '}
               <Link to="/login" className="text-sky-300 underline underline-offset-4 hover:text-sky-200">
                 Log in
               </Link>{' '}
@@ -192,7 +197,7 @@ export default function Register() {
         )}
 
         <label className="block">
-          <span className="sys-label">Hunter Name</span>
+          <span className="sys-label">Ascendant Name</span>
           <input
             type="text"
             className="sys-input"
@@ -212,7 +217,7 @@ export default function Register() {
             className="sys-input"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="hunter@example.com"
+            placeholder="ascendant@example.com"
             autoComplete="email"
             required
           />
@@ -270,18 +275,18 @@ export default function Register() {
             required
           />
           <span>
-            I am <span className="text-ink">18 or older</span> and accept that ASCEND provides general fitness
+            I am <span className="text-ink">16 or older</span> and accept that ASCEND provides general fitness
             information, <span className="text-ink">not medical advice</span>.
           </span>
         </label>
 
         <GlowButton type="submit" size="lg" full loading={loading} icon={<UserPlus size={16} />} className="mt-1">
-          Begin Awakening
+          Begin Ascension
         </GlowButton>
       </form>
 
       <p className="mt-6 text-center text-sm text-mute">
-        Already awakened?{' '}
+        Already ascended?{' '}
         <Link to="/login" className="text-sky-300 underline-offset-4 transition hover:text-sky-200 hover:underline">
           Log in
         </Link>

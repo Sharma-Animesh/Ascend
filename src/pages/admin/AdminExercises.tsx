@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ChangeEvent, ReactNode } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Dumbbell, Pencil, Plus, Search, Trash2, X } from 'lucide-react'
+import { Copy, Dumbbell, Pencil, Plus, Search, Trash2, X } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import type { Difficulty, Exercise, ExerciseCategory, StatKey } from '../../lib/types'
 import { STAT_KEYS, STAT_META } from '../../lib/game'
@@ -13,6 +13,14 @@ import { ExerciseVisual } from '../../components/ExerciseVisual'
 
 const CATEGORIES: ExerciseCategory[] = ['home', 'gym', 'calisthenics', 'yoga', 'breath', 'martial']
 const DIFFICULTIES: Difficulty[] = ['beginner', 'intermediate', 'advanced']
+
+/** Built-in hologram scene keys offered as autocomplete for `anim:` values. */
+const ANIM_KEYS = [
+  'pushup', 'squat', 'pistol', 'deadlift', 'lunge', 'bridge', 'bench', 'press', 'pull', 'pulldown',
+  'row', 'pullapart', 'curl', 'generic', 'dip', 'plank', 'sideplank', 'hollow', 'crunch', 'run',
+  'jacks', 'rope', 'burpee', 'punch', 'kick', 'knee', 'slip', 'footwork', 'guard', 'stretch',
+  'breathe', 'catcow', 'child', 'downdog', 'pigeon', 'thread', 'warrior', 'foldstand',
+]
 const easeOut = [0.22, 1, 0.36, 1] as const
 
 interface FormState {
@@ -189,6 +197,15 @@ export default function AdminExercises() {
     setFormOpen(true)
   }
 
+  /** Duplicate: pre-fill a NEW exercise with an existing row's data. */
+  const openDuplicate = (ex: Exercise) => {
+    setEditing(null)
+    setForm({ ...formFrom(ex), name: `${ex.name} (Copy)` })
+    setFormError(null)
+    setConfirmDelete(false)
+    setFormOpen(true)
+  }
+
   const togglePublished = async (ex: Exercise) => {
     const next = !ex.published
     setExercises((prev) => (prev ? prev.map((e) => (e.id === ex.id ? { ...e, published: next } : e)) : prev))
@@ -339,7 +356,7 @@ export default function AdminExercises() {
             hint={
               search || category !== 'all'
                 ? 'Adjust your search or filter.'
-                : 'Forge the first technique for your Hunters.'
+                : 'Forge the first technique for your Ascendants.'
             }
             action={
               <GlowButton variant="gold" size="sm" icon={<Plus size={14} />} onClick={openNew}>
@@ -383,6 +400,15 @@ export default function AdminExercises() {
                       </span>
                     )}
                   </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openDuplicate(ex)}
+                  aria-label={`Duplicate ${ex.name}`}
+                  title="Duplicate"
+                  className="grid h-11 w-11 shrink-0 place-items-center rounded-md text-mute transition hover:bg-sky-500/10 hover:text-sky-300"
+                >
+                  <Copy size={15} />
                 </button>
                 <Toggle
                   on={ex.published}
@@ -442,7 +468,7 @@ export default function AdminExercises() {
                   <input
                     value={form.name}
                     onChange={(e) => set({ name: e.target.value })}
-                    placeholder="e.g. Shadow Push-up"
+                    placeholder="e.g. Diamond Push-up"
                     className="sys-input"
                   />
                 </Field>
@@ -583,14 +609,20 @@ export default function AdminExercises() {
 
                 <Field
                   label="Animation"
-                  hint="Built-in keys: anim:pushup, anim:squat, anim:pull, anim:plank, anim:run, anim:stretch, anim:breathe, anim:punch — or an https:// video URL."
+                  hint="Leave empty to auto-match the exercise name. Built-in keys: anim:pushup, squat, pistol, deadlift, lunge, bridge, bench, press, pull, pulldown, row, pullapart, curl, dip, plank, sideplank, hollow, crunch, run, jacks, rope, burpee, punch, kick, knee, slip, footwork, guard, stretch, breathe, catcow, child, downdog, pigeon, thread, warrior, foldstand — or an https:// video URL."
                 >
                   <input
                     value={form.animation_url}
                     onChange={(e) => set({ animation_url: e.target.value })}
-                    placeholder="anim:pushup"
+                    placeholder="anim:pushup (or leave empty to auto-match by name)"
                     className="sys-input"
+                    list="anim-key-options"
                   />
+                  <datalist id="anim-key-options">
+                    {ANIM_KEYS.map((k) => (
+                      <option key={k} value={`anim:${k}`} />
+                    ))}
+                  </datalist>
                 </Field>
 
                 <Field label="Image URL" hint="Optional https:// image, shown when no animation is set">
@@ -610,7 +642,7 @@ export default function AdminExercises() {
                     className="h-4 w-4 accent-sky-400"
                   />
                   <span className="text-sm font-semibold text-ink">Published</span>
-                  <span className="text-xs text-mute">— visible to all Hunters</span>
+                  <span className="text-xs text-mute">— visible to all Ascendants</span>
                 </label>
 
                 {formError && (

@@ -6,6 +6,7 @@ import { SystemPanel } from '../../components/system/SystemPanel'
 import { GlowButton } from '../../components/system/GlowButton'
 import { LogoMark } from '../../components/system/Logo'
 import { supabase } from '../../lib/supabase'
+import { isNative } from '../../lib/native'
 
 const EASE = [0.22, 1, 0.36, 1] as const
 
@@ -60,7 +61,7 @@ export default function Reset() {
     setError(null)
     setLoading(true)
     const { error: err } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: window.location.origin + '/login',
+      redirectTo: isNative ? 'ascend://auth/callback' : window.location.origin + '/login',
     })
     setLoading(false)
     if (err) {
@@ -83,7 +84,7 @@ export default function Reset() {
             <MailCheck size={28} className="animate-pulse-glow text-sky-300" />
           </span>
           <p className="mt-5 text-sm leading-relaxed text-mute">
-            If a Hunter record exists for <span className="font-semibold text-ink">{email.trim()}</span>, a recovery
+            If an Ascendant record exists for <span className="font-semibold text-ink">{email.trim()}</span>, a recovery
             link is on its way. Follow it to forge a new access key.
           </p>
           <p className="mt-3 text-xs text-mute/70">
@@ -112,7 +113,7 @@ export default function Reset() {
       <div className="mb-5 flex items-start gap-3 rounded-md border border-line bg-abyss/50 px-3.5 py-3">
         <KeyRound size={18} className="mt-0.5 shrink-0 text-sky-300" />
         <p className="text-sm leading-snug text-mute">
-          Lost your access key, Hunter? Enter the email bound to your record and the System will dispatch a recovery
+          Lost your access key, Ascendant? Enter the email bound to your record and the System will dispatch a recovery
           link.
         </p>
       </div>
@@ -137,7 +138,7 @@ export default function Reset() {
             className="sys-input"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="hunter@example.com"
+            placeholder="ascendant@example.com"
             autoComplete="email"
             required
           />

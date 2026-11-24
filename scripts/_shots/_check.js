@@ -1,0 +1,841 @@
+const COL = { lb:'#35597f', lb2:'#2f5074', far:'#22394f', cap:'#2a4a6e' };
+const HD = 'fill="#35597f" stroke="#4d7fb5" stroke-width="1"';
+const limb=(d,w,c='lb')=>`<path d="${d}" stroke="${COL[c]}" stroke-width="${w}" stroke-linecap="round" fill="none"/>`;
+const head=(cx,cy,r=7)=>`<circle cx="${cx}" cy="${cy}" r="${r}" ${HD}/>`;
+const mus=(cx,cy,rx,ry,rot=0)=>`<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" ${rot?`transform="rotate(${rot} ${cx} ${cy})"`:''} fill="url(#exvMus)" opacity=".9" style="filter:drop-shadow(0 0 6px rgba(249,115,22,.8));animation:exv-mpulse 2s ease-in-out infinite"/>`;
+const jt=(x,y,anim,inner)=>`<g style="transform-origin:${x}px ${y}px;animation:${anim}">${inner}</g>`;
+const grp=(style,inner)=>`<g style="${style}">${inner}</g>`;
+const ground=()=>`<line x1="14" y1="132" x2="206" y2="132" stroke="rgba(56,189,248,.25)" stroke-width="2" stroke-linecap="round"/>`;
+const shadow=(cx,rx)=>`<ellipse cx="${cx}" cy="132" rx="${rx}" ry="3" fill="rgba(56,189,248,.08)"/>`;
+const GLOW='filter:drop-shadow(0 0 4px rgba(56,189,248,0.45))';
+const EQ='rgba(125,211,252,0.55)'; // equipment steel
+const EQ2='rgba(125,211,252,0.35)';
+const BAND='#a78bfa';
+const plate=(cx,cy,r)=>`<circle cx="${cx}" cy="${cy}" r="${r}" fill="#223c55" stroke="#4d7fb5" stroke-width="1.2"/><circle cx="${cx}" cy="${cy}" r="${(r*0.35).toFixed(1)}" fill="#0d1528" stroke="#4d7fb5" stroke-width=".8"/>`;
+const CUECOL={EXHALE:'#22d3ee',INHALE:'#93c5fd'};
+const cue=(dur,first)=>{const b=first==='EXHALE'?'INHALE':'EXHALE';
+  return `<text x="13" y="19" font-family="Orbitron,sans-serif" font-size="7" letter-spacing="2.5" fill="${CUECOL[first]}" style="animation:exv-cue-a ${dur} linear infinite">${first}</text>`+
+         `<text x="13" y="19" font-family="Orbitron,sans-serif" font-size="7" letter-spacing="2.5" fill="${CUECOL[b]}" style="animation:exv-cue-b ${dur} linear infinite">${b}</text>`;};
+
+let KF = `
+@keyframes exv-mpulse { 0%,100%{opacity:.95} 50%{opacity:.5} }
+@keyframes exv-dash { to { stroke-dashoffset:-60 } }
+@keyframes exv-cue-a { 0%{opacity:0} 6%,38%{opacity:.9} 46%,100%{opacity:0} }
+@keyframes exv-cue-b { 0%,52%{opacity:0} 60%,94%{opacity:.9} 100%{opacity:0} }
+/* pushup (existing) */
+@keyframes exv-pu-body { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(-9deg)} }
+@keyframes exv-pu-fore { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(62deg)} }
+@keyframes exv-pu-up   { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(-109deg)} }
+/* bench press */
+@keyframes exv-bp-up   { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(-96deg)} }
+@keyframes exv-bp-fore { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(118deg)} }
+/* seated machine press */
+@keyframes exv-sp-up   { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(-86deg)} }
+@keyframes exv-sp-fore { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(104deg)} }
+@keyframes exv-sp-stack{ 0%,100%{transform:translateY(0)} 45%,58%{transform:translateY(-9px)} }
+/* overhead press */
+@keyframes exv-op-upL  { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(-146deg)} }
+@keyframes exv-op-foreL{ 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(128deg)} }
+@keyframes exv-op-upR  { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(146deg)} }
+@keyframes exv-op-foreR{ 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(-128deg)} }
+@keyframes exv-op-bar  { 0%,100%{transform:translateY(0)} 45%,58%{transform:translateY(-31px)} }
+/* pull-up (existing) */
+@keyframes exv-pl-body  { 0%,100%{transform:translateY(0)} 22.5%{transform:translateY(-17.5px)} 45%,58%{transform:translateY(-35px)} 79%{transform:translateY(-17.5px)} }
+@keyframes exv-pl-foreL { 0%,100%{transform:rotate(0deg)} 22.5%{transform:rotate(40deg)} 45%,58%{transform:rotate(14.3deg)} 79%{transform:rotate(40deg)} }
+@keyframes exv-pl-upL   { 0%,100%{transform:rotate(0deg)} 22.5%{transform:rotate(-96.6deg)} 45%,58%{transform:rotate(-141.5deg)} 79%{transform:rotate(-96.6deg)} }
+@keyframes exv-pl-foreR { 0%,100%{transform:rotate(0deg)} 22.5%{transform:rotate(-40deg)} 45%,58%{transform:rotate(-14.3deg)} 79%{transform:rotate(-40deg)} }
+@keyframes exv-pl-upR   { 0%,100%{transform:rotate(0deg)} 22.5%{transform:rotate(96.6deg)} 45%,58%{transform:rotate(141.5deg)} 79%{transform:rotate(96.6deg)} }
+/* negative pull-up: fast rise, slow descent */
+@keyframes exv-ng-body  { 0%{transform:translateY(0)} 6%{transform:translateY(-17.5px)} 12%,22%{transform:translateY(-35px)} 40%{transform:translateY(-26px)} 60%{transform:translateY(-16px)} 80%{transform:translateY(-7px)} 94%,100%{transform:translateY(0)} }
+@keyframes exv-ng-foreL { 0%{transform:rotate(0deg)} 6%{transform:rotate(40deg)} 12%,22%{transform:rotate(14.3deg)} 40%{transform:rotate(27deg)} 60%{transform:rotate(37deg)} 80%{transform:rotate(16deg)} 94%,100%{transform:rotate(0deg)} }
+@keyframes exv-ng-upL   { 0%{transform:rotate(0deg)} 6%{transform:rotate(-96.6deg)} 12%,22%{transform:rotate(-141.5deg)} 40%{transform:rotate(-119deg)} 60%{transform:rotate(-89deg)} 80%{transform:rotate(-39deg)} 94%,100%{transform:rotate(0deg)} }
+@keyframes exv-ng-foreR { 0%{transform:rotate(0deg)} 6%{transform:rotate(-40deg)} 12%,22%{transform:rotate(-14.3deg)} 40%{transform:rotate(-27deg)} 60%{transform:rotate(-37deg)} 80%{transform:rotate(-16deg)} 94%,100%{transform:rotate(0deg)} }
+@keyframes exv-ng-upR   { 0%{transform:rotate(0deg)} 6%{transform:rotate(96.6deg)} 12%,22%{transform:rotate(141.5deg)} 40%{transform:rotate(119deg)} 60%{transform:rotate(89deg)} 80%{transform:rotate(39deg)} 94%,100%{transform:rotate(0deg)} }
+@keyframes exv-ng-slow  { 0%,20%{opacity:0} 30%,80%{opacity:.8} 92%,100%{opacity:0} }
+/* lat pulldown */
+@keyframes exv-pd-bar   { 0%,100%{transform:translateY(0)} 40%,55%{transform:translateY(32px)} }
+@keyframes exv-pd-cable { 0%,100%{transform:scaleY(1)} 40%,55%{transform:scaleY(2.23)} }
+@keyframes exv-pd-foreL { 0%,100%{transform:rotate(0deg)} 40%,55%{transform:rotate(-38deg)} }
+@keyframes exv-pd-upL   { 0%,100%{transform:rotate(0deg)} 40%,55%{transform:rotate(112deg)} }
+@keyframes exv-pd-foreR { 0%,100%{transform:rotate(0deg)} 40%,55%{transform:rotate(38deg)} }
+@keyframes exv-pd-upR   { 0%,100%{transform:rotate(0deg)} 40%,55%{transform:rotate(-112deg)} }
+@keyframes exv-pd-lean  { 0%,100%{transform:rotate(0deg)} 40%,55%{transform:rotate(-7deg)} }
+/* band row */
+@keyframes exv-rw-up    { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(-80deg)} }
+@keyframes exv-rw-fore  { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(76deg)} }
+@keyframes exv-rw-brot  { 0%,100%{transform:rotate(-40.1deg)} 45%,58%{transform:rotate(-30.4deg)} }
+@keyframes exv-rw-blen  { 0%,100%{transform:scaleX(49.7)} 45%,58%{transform:scaleX(67.2)} }
+/* seated cable row */
+@keyframes exv-sr-up    { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(80deg)} }
+@keyframes exv-sr-fore  { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(-94deg)} }
+@keyframes exv-sr-lean  { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(-6deg)} }
+@keyframes exv-sr-cable { 0%,100%{transform:scaleX(28)} 45%,58%{transform:scaleX(47)} }
+/* band pull-apart */
+@keyframes exv-pa-armL  { 0%,100%{transform:scaleX(.5)} 45%,58%{transform:scaleX(1)} }
+@keyframes exv-pa-band  { 0%,100%{transform:scaleX(1)} 45%,58%{transform:scaleX(1.625)} }
+/* straight bar dip */
+@keyframes exv-dp-body  { 0%,100%{transform:translateY(0)} 45%,58%{transform:translateY(14px)} }
+@keyframes exv-dp-foreL { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(-48deg)} }
+@keyframes exv-dp-upL   { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(112deg)} }
+@keyframes exv-dp-foreR { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(48deg)} }
+@keyframes exv-dp-upR   { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(-112deg)} }
+/* biceps curl */
+@keyframes exv-cu-fore  { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(-118deg)} }
+`;
+
+// ---------- PUSH FAMILY ----------
+function pushupS(){const cyc='1.8s ease-in-out infinite';
+  return ground()+shadow(112,66)+grp(GLOW,
+    jt(72,130,`exv-pu-fore ${cyc}`, limb('M72 130 L73 111',8,'far')+jt(73,111,`exv-pu-up ${cyc}`, limb('M73 111 L74 93',9,'far')))
+    +jt(166,128,`exv-pu-body ${cyc}`,
+      limb('M64 92 L92 97.5',15,'cap')+limb('M92 97.5 L118 103',12,'cap')+limb('M55 90.5 L61 91.5',7)+head(48.5,89.5)
+      +limb('M118 103 L140 112',10.5)+limb('M140 112 L160 122',9,'lb2')+limb('M160 122 L167 129',7,'lb2')
+      +mus(71,99.5,9.5,5,11))
+    +jt(62,130,`exv-pu-fore ${cyc}`, limb('M62 130 L63 111',8.5,'lb2')+jt(63,111,`exv-pu-up ${cyc}`, limb('M63 111 L64 92',9.5)+`<circle cx="64" cy="92" r="5" ${HD}/>`+mus(66,102,3.2,7,-4))))
+  +cue('1.8s','INHALE');}
+
+function benchpressS(){const cyc='2.2s ease-in-out infinite';
+  return ground()+shadow(108,62)
+    // bench + legs
+    +`<rect x="60" y="101" width="76" height="6" rx="2" fill="#16273f" stroke="${EQ2}" stroke-width="1"/>`
+    +`<path d="M68 107 L68 126 M126 107 L126 126" stroke="${EQ2}" stroke-width="4" stroke-linecap="round"/>`
+    +grp(GLOW,
+      // lying body: head left, torso along bench, knees bent, feet on floor
+      head(72,93)+limb('M79 95 L84 96.5',7)
+      +limb('M84 97 L112 99',15,'cap')+limb('M112 99 L126 100.5',12,'cap')
+      +limb('M126 100.5 L143 92',10.5)+limb('M143 92 L149 126',9,'lb2')+limb('M149 126 L158 129',6,'lb2')
+      +mus(95,95.5,9,4.5,4)
+      // far arm + bar plate at hand
+      +jt(96,96,'exv-bp-up 2.2s ease-in-out infinite', limb('M96 96 L97 80',8.5,'far')
+        +jt(97,80,'exv-bp-fore 2.2s ease-in-out infinite', limb('M97 80 L97.5 64',7.5,'far')))
+      // near arm carries the bar (end-on: plate + grip)
+      +jt(92,97,'exv-bp-up 2.2s ease-in-out infinite', limb('M92 97 L93 80',9)+mus(90,89,3,6.5,6)
+        +jt(93,80,'exv-bp-fore 2.2s ease-in-out infinite', limb('M93 80 L93.5 63',8,'lb2')
+          +plate(93.5,60,8)+`<circle cx="93.5" cy="60" r="2.6" fill="#4d7fb5"/>`)))
+  +cue('2.2s','INHALE');}
+
+function seatedpressS(){const cyc='2.2s ease-in-out infinite';
+  return ground()+shadow(104,52)
+    // weight stack behind seat
+    +`<rect x="46" y="86" width="20" height="44" rx="2" fill="#0d1528" stroke="${EQ2}" stroke-width="1"/>`
+    +`<path d="M48 96 h16 M48 104 h16 M48 112 h16 M48 120 h16" stroke="#1b2a44" stroke-width="2"/>`
+    +grp(`transform-origin:56px 92px;animation:exv-sp-stack ${cyc}`,`<rect x="47" y="87" width="18" height="8" rx="1.5" fill="#223c55" stroke="${EQ2}" stroke-width="1"/>`)
+    // machine seat: back pad + seat + post
+    +`<rect x="78" y="60" width="7" height="50" rx="3" fill="#16273f" stroke="${EQ2}" stroke-width="1" transform="rotate(4 81 85)"/>`
+    +`<rect x="82" y="106" width="30" height="6" rx="2" fill="#16273f" stroke="${EQ2}" stroke-width="1"/>`
+    +`<path d="M96 112 L96 129" stroke="${EQ2}" stroke-width="4" stroke-linecap="round"/>`
+    +grp(GLOW,
+      head(94,56)+limb('M95 62.5 L96 66',7)
+      +limb('M96 66 L98 84',15,'cap')+limb('M98 84 L99 100',13,'cap')
+      +limb('M99 100 L124 104',11)+limb('M124 104 L122 127',9,'lb2')+limb('M122 127 L132 129.5',6,'lb2')
+      +mus(101,73,4.5,7,-8)
+      // far arm
+      +jt(99,71,`exv-sp-up ${cyc}`, limb('M99 71 L92 84',8,'far')
+        +jt(92,84,`exv-sp-fore ${cyc}`, limb('M92 84 L108 77',7,'far')+`<path d="M108 72 L108 82" stroke="${EQ}" stroke-width="3.5" stroke-linecap="round"/>`))
+      // near arm + handle
+      +jt(97,70,`exv-sp-up ${cyc}`, limb('M97 70 L89 83',8.5)
+        +jt(89,83,`exv-sp-fore ${cyc}`, limb('M89 83 L106 75',7.5,'lb2')+`<path d="M106 69.5 L106 80.5" stroke="${EQ}" stroke-width="4" stroke-linecap="round"/>`)))
+  +cue('2.2s','EXHALE');}
+
+function overheadpressS(){const cyc='2.2s ease-in-out infinite';
+  return ground()+shadow(110,30)+grp(GLOW,
+    // legs + torso front view
+    limb('M101 130 L110 130',6,'lb2')+limb('M110 130 L119 130',6,'lb2')
+    +limb('M104 128 L105.5 104',9.5)+limb('M116 128 L114.5 104',9.5)
+    +limb('M105.5 104 L107 86',10.5)+limb('M114.5 104 L113 86',10.5)
+    +limb('M107 88 L110 70',15,'cap')+limb('M113 88 L110 70',15,'cap')+limb('M110 88 L110 66',14,'cap')
+    +head(110,53,7.3)
+    +mus(102,68,4,3.4)+mus(118,68,4,3.4)
+    // arms: shoulder -> elbow down-out -> hand at bar
+    +jt(99,66,`exv-op-upL ${cyc}`, limb('M99 66 L93 79',8)+mus(98,70,3.6,5,20)
+      +jt(93,79,`exv-op-foreL ${cyc}`, limb('M93 79 L95.5 63.5',7,'lb2')))
+    +jt(121,66,`exv-op-upR ${cyc}`, limb('M121 66 L127 79',8)+mus(122,70,3.6,5,-20)
+      +jt(127,79,`exv-op-foreR ${cyc}`, limb('M127 79 L124.5 63.5',7,'lb2')))
+    // bar with plates, synced translate
+    +grp(`animation:exv-op-bar ${cyc}`,
+      `<line x1="80" y1="61" x2="140" y2="61" stroke="${EQ}" stroke-width="3.5" stroke-linecap="round"/>`
+      +plate(83,61,6)+plate(137,61,6)))
+  +cue('2.2s','EXHALE');}
+
+// ---------- PULL FAMILY ----------
+const pullRig=(p,cyc,extra)=>
+  `<line x1="30" y1="132" x2="190" y2="132" stroke="rgba(56,189,248,0.25)" stroke-width="2" stroke-linecap="round" opacity=".5"/>`
+  +`<path d="M62 24 L58 132" stroke="${EQ2}" stroke-width="3" stroke-linecap="round" fill="none"/>`
+  +`<path d="M158 24 L162 132" stroke="${EQ2}" stroke-width="3" stroke-linecap="round" fill="none"/>`
+  +`<line x1="60" y1="24" x2="160" y2="24" stroke="${EQ}" stroke-width="4" stroke-linecap="round"/>`
+  +grp(GLOW,
+    grp(`animation:exv-${p}-body ${cyc}`,
+      head(110,53.5)+limb('M110 59 L110 63',7)
+      +`<path d="M96 62 Q110 56.5 124 62 L119.5 93 Q110 97.5 100.5 93 Z" fill="#2a4a6e" stroke="#4d7fb5" stroke-width="1"/>`
+      +`<circle cx="95.5" cy="64" r="5.2" ${HD}/><circle cx="124.5" cy="64" r="5.2" ${HD}/>`
+      +mus(99.5,77,3.4,7.5,-10)+mus(120.5,77,3.4,7.5,10)
+      +limb('M104 95 L116 95',9,'cap')
+      +limb('M106 97 L104 113',9.5)+limb('M104 113 L107.5 127',8.5,'lb2')
+      +limb('M114 97 L115.5 113',9.5)+limb('M115.5 113 L112 127',8.5,'lb2')
+      +limb('M107.5 127 L110.5 130.5',6,'lb2')+limb('M112 127 L109 130.5',6,'lb2'))
+    +jt(88,26,`exv-${p}-foreL ${cyc}`, limb('M88 26 L88.9 45.5',8,'lb2')
+      +jt(88.9,45.5,`exv-${p}-upL ${cyc}`, limb('M88.9 45.5 L95 64',9)+`<circle cx="95" cy="64" r="4.5" ${HD}/>`+mus(91.5,55,3,6.5,18)))
+    +`<circle cx="88" cy="25" r="3.8" ${HD}/>`
+    +jt(132,26,`exv-${p}-foreR ${cyc}`, limb('M132 26 L131.1 45.5',8,'lb2')
+      +jt(131.1,45.5,`exv-${p}-upR ${cyc}`, limb('M131.1 45.5 L125 64',9)+`<circle cx="125" cy="64" r="4.5" ${HD}/>`+mus(128.5,55,3,6.5,-18)))
+    +`<circle cx="132" cy="25" r="3.8" ${HD}/>`)+(extra||'');
+
+function pullS(){return pullRig('pl','1.8s ease-in-out infinite')+cue('1.8s','EXHALE');}
+function pullnegS(){
+  const chev=(y,d)=>`<path d="M176 ${y} l6 7 l6 -7" stroke="#22d3ee" stroke-width="2.5" fill="none" stroke-linecap="round" style="animation:exv-ng-slow 4.5s linear infinite;animation-delay:${d}s"/>`;
+  return pullRig('ng','4.5s linear infinite', chev(62,0)+chev(74,0.35)+chev(86,0.7));}
+
+function pulldownS(){const cyc='2.4s ease-in-out infinite';
+  return ground()
+    // overhead frame + pulley
+    +`<path d="M110 14 L110 18" stroke="${EQ}" stroke-width="3" stroke-linecap="round"/>`
+    +`<line x1="92" y1="15" x2="128" y2="15" stroke="${EQ}" stroke-width="4" stroke-linecap="round"/>`
+    +`<circle cx="110" cy="19" r="3.5" fill="#16273f" stroke="${EQ}" stroke-width="1.5"/>`
+    // bench seat
+    +`<rect x="92" y="112" width="36" height="5" rx="2" fill="#16273f" stroke="${EQ2}" stroke-width="1"/>`
+    +`<path d="M108 117 L108 130" stroke="${EQ2}" stroke-width="4" stroke-linecap="round"/>`
+    // cable stretches down from the pulley
+    +grp(`transform-origin:110px 21px;animation:exv-pd-cable ${cyc}`,`<line x1="110" y1="21" x2="110" y2="41" stroke="${EQ2}" stroke-width="1"/>`)
+    +grp(GLOW,
+      // seated body, slight lean handled on torso group
+      grp(`transform-origin:108px 108px;animation:exv-pd-lean ${cyc}`,
+        head(109,66,7.2)+limb('M109 72.5 L109 76',7)
+        +limb('M109 76 L108.5 92',15,'cap')+limb('M108.5 92 L108 106',13,'cap')
+        +mus(100,84,3.6,7.5,-8)+mus(117,84,3.6,7.5,8))
+      // legs forward under knee pad
+      +limb('M108 106 L128 109',10.5)+limb('M128 109 L127 128',9,'lb2')+limb('M127 128 L135 130',6,'lb2')
+      +limb('M104 107 L122 110',9,'far')+limb('M122 110 L121 128',8,'far')
+      +`<rect x="118" y="98" width="16" height="5" rx="2.5" fill="#16273f" stroke="${EQ2}" stroke-width="1"/>`
+      // bar group descends; arms rooted at hands inside it
+      +grp(`animation:exv-pd-bar ${cyc}`,
+        `<path d="M78 44 Q110 38 142 44" stroke="${EQ}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`
+        +jt(82,43,`exv-pd-foreL ${cyc}`, limb('M82 43 L88 58',8,'lb2')
+          +jt(88,58,`exv-pd-upL ${cyc}`, limb('M88 58 L98 74',9)))
+        +`<circle cx="82" cy="43" r="3.6" ${HD}/>`
+        +jt(138,43,`exv-pd-foreR ${cyc}`, limb('M138 43 L132 58',8,'lb2')
+          +jt(132,58,`exv-pd-upR ${cyc}`, limb('M132 58 L122 74',9)))
+        +`<circle cx="138" cy="43" r="3.6" ${HD}/>`))
+  +cue('2.4s','EXHALE');}
+
+function rowS(){const cyc='2s ease-in-out infinite';
+  return ground()+shadow(112,44)
+    // low anchor + band (rotating + stretching unit line)
+    +`<circle cx="36" cy="126" r="3" fill="#16273f" stroke="${BAND}" stroke-width="1.5"/>`
+    +grp(`transform-origin:36px 126px;animation:exv-rw-brot ${cyc}`,
+      grp(`transform-origin:36px 126px;animation:exv-rw-blen ${cyc}`,
+        `<line x1="36" y1="126" x2="37" y2="126" stroke="${BAND}" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linecap="round" opacity=".85"/>`))
+    +grp(GLOW,
+      // staggered bent-over stance
+      limb('M116 130 L130 130',6,'far')+limb('M124 130 L138 130',6,'lb2')
+      +limb('M132 129 L124 108',9.5,'lb2')+limb('M124 108 L130 88',10.5)
+      // torso tipped forward
+      +limb('M130 88 L112 74',14,'cap')+limb('M112 74 L98 67',14.5,'cap')
+      +limb('M96.5 66 L92.5 63',7)+head(88,59.5)
+      +mus(112,72,7.5,4,22)
+      // far arm
+      +jt(101,70,`exv-rw-up ${cyc}`, limb('M101 70 L91 83',8,'far')
+        +jt(91,83,`exv-rw-fore ${cyc}`, limb('M91 83 L78 94',7,'far')))
+      // near arm
+      +jt(98,68,`exv-rw-up ${cyc}`, limb('M98 68 L88 82',8.5)
+        +jt(88,82,`exv-rw-fore ${cyc}`, limb('M88 82 L74 94',7.5,'lb2')+`<circle cx="74" cy="94" r="3.4" ${HD}/>`)))
+  +cue('2s','EXHALE');}
+
+function seatedrowS(){const cyc='2.2s ease-in-out infinite';
+  return ground()+shadow(120,52)
+    // low pulley block + footplate
+    +`<rect x="160" y="102" width="10" height="28" rx="2" fill="#0d1528" stroke="${EQ2}" stroke-width="1"/>`
+    +`<path d="M152 112 L160 128" stroke="${EQ2}" stroke-width="4" stroke-linecap="round"/>`
+    // cable from pulley to handle (scaleX unit line)
+    +grp(`transform-origin:161px 97px;animation:exv-sr-cable ${cyc}`,
+      `<line x1="161" y1="97" x2="160" y2="97" stroke="${EQ2}" stroke-width="1.2" vector-effect="non-scaling-stroke"/>`)
+    // bench pad
+    +`<rect x="92" y="114" width="34" height="5" rx="2" fill="#16273f" stroke="${EQ2}" stroke-width="1"/>`
+    +grp(GLOW,
+      // legs forward, feet on plate
+      limb('M110 113 L138 116',10.5)+limb('M138 116 L152 122',9,'lb2')+limb('M152 122 L155 113',6.5,'lb2')
+      // torso rocks slightly at the hips
+      +grp(`transform-origin:108px 112px;animation:exv-sr-lean ${cyc}`,
+        limb('M108 112 L106 92',15,'cap')+limb('M106 92 L104.5 78',14.5,'cap')
+        +limb('M104.3 77 L104 71.5',7)+head(103.5,66.5)
+        +mus(101,90,3.8,8,-6)
+        // far arm
+        +jt(107,80,`exv-sr-up ${cyc}`, limb('M107 80 L121 88',8,'far')
+          +jt(121,88,`exv-sr-fore ${cyc}`, limb('M121 88 L136 96',7,'far')))
+        // near arm + handle
+        +jt(105,78,`exv-sr-up ${cyc}`, limb('M105 78 L119 87',8.5)
+          +jt(119,87,`exv-sr-fore ${cyc}`, limb('M119 87 L135 95.5',7.5,'lb2')
+            +`<path d="M136 90.5 L136 101" stroke="${EQ}" stroke-width="4" stroke-linecap="round"/>`))))
+  +cue('2.2s','EXHALE');}
+
+function pullapartS(){const cyc='2.2s ease-in-out infinite';
+  return ground()+shadow(110,30)+grp(GLOW,
+    limb('M101 130 L110 130',6,'lb2')+limb('M110 130 L119 130',6,'lb2')
+    +limb('M104 128 L105.5 103',9.5)+limb('M116 128 L114.5 103',9.5)
+    +limb('M105.5 103 L107 85',10.5)+limb('M114.5 103 L113 85',10.5)
+    +limb('M107 87 L110 69',15,'cap')+limb('M113 87 L110 69',15,'cap')+limb('M110 87 L110 65',14,'cap')
+    +head(110,52,7.3)
+    +mus(101,67,4.2,3.4)+mus(119,67,4.2,3.4)
+    // straight arms foreshorten out to a T
+    +grp(`transform-origin:98px 68px;animation:exv-pa-armL ${cyc}`, limb('M98 68 L58 68',8))
+    +grp(`transform-origin:122px 68px;animation:exv-pa-armL ${cyc}`, limb('M122 68 L162 68',8))
+    // band between hands
+    +grp(`transform-origin:110px 68px;animation:exv-pa-band ${cyc}`,
+      `<line x1="78" y1="68" x2="142" y2="68" stroke="${BAND}" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linecap="round" opacity=".85"/>`));}
+
+function dipS(){const cyc='2s ease-in-out infinite';
+  return ground()
+    // straight bar mid-frame + posts
+    +`<path d="M74 88 L70 132 M146 88 L150 132" stroke="${EQ2}" stroke-width="3" stroke-linecap="round"/>`
+    +`<line x1="70" y1="88" x2="150" y2="88" stroke="${EQ}" stroke-width="4" stroke-linecap="round"/>`
+    +grp(GLOW,
+      grp(`animation:exv-dp-body ${cyc}`,
+        head(110,47,7.2)+limb('M110 53.5 L110 57',7)
+        +`<path d="M97 60 Q110 54.5 123 60 L119 90 Q110 94.5 101 90 Z" fill="#2a4a6e" stroke="#4d7fb5" stroke-width="1"/>`
+        +mus(103,64,4.5,3.6)+mus(117,64,4.5,3.6)+mus(110,78,5.5,4)
+        +limb('M105 92 L104 112',9.5)+limb('M104 112 L102 126',8.5,'lb2')
+        +limb('M115 92 L116 112',9.5)+limb('M116 112 L118 126',8.5,'lb2'))
+      // arms rooted at hands on the bar
+      +jt(92,88,`exv-dp-foreL ${cyc}`, limb('M92 88 L90.5 72',8,'lb2')
+        +jt(90.5,72,`exv-dp-upL ${cyc}`, limb('M90.5 72 L94 60',9)+mus(92,66,3,5.5,10)))
+      +`<circle cx="92" cy="88" r="3.8" ${HD}/>`
+      +jt(128,88,`exv-dp-foreR ${cyc}`, limb('M128 88 L129.5 72',8,'lb2')
+        +jt(129.5,72,`exv-dp-upR ${cyc}`, limb('M129.5 72 L126 60',9)+mus(128,66,3,5.5,-10)))
+      +`<circle cx="128" cy="88" r="3.8" ${HD}/>`);}
+
+function curlS(){const cyc='2s ease-in-out infinite';
+  const dumbAt=(s)=>`<g${s?` style="${s}"`:''}><line x1="-6" y1="0" x2="6" y2="0" stroke="${EQ}" stroke-width="2.5" stroke-linecap="round"/><circle cx="-6" cy="0" r="3.4" fill="#223c55" stroke="#4d7fb5" stroke-width="1"/><circle cx="6" cy="0" r="3.4" fill="#223c55" stroke="#4d7fb5" stroke-width="1"/></g>`;
+  return ground()+shadow(106,28)+grp(GLOW,
+    limb('M96 130 L112 130',6,'lb2')+limb('M100 128 L102 106',9.5)+limb('M102 106 L101 86',10.5)
+    +limb('M101 86 L102 70',14,'cap')+limb('M102 70 L104 55',15,'cap')
+    +limb('M104.5 54 L105.5 49.5',7)+head(106.5,45)
+    // far arm
+    +limb('M102 58 L104 78',7.5,'far')
+    +jt(104,78,`exv-cu-fore ${cyc}`, limb('M104 78 L106 96',6.5,'far')+`<g transform="translate(106,98)">${dumbAt()}</g>`)
+    // near arm: upper arm pinned, forearm curls
+    +limb('M106 58 L108 79',8.5)+mus(109,68,3.2,7,-3)
+    +jt(108,79,`exv-cu-fore ${cyc}`, limb('M108 79 L110 98',7.5,'lb2')+`<g transform="translate(110.5,100)">${dumbAt()}</g>`))
+  +cue('2s','EXHALE');}
+KF += `
+/* squat (existing) */
+@keyframes exv-sq-shin  { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(22deg)} }
+@keyframes exv-sq-thigh { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(-96deg)} }
+@keyframes exv-sq-torso { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(117deg)} }
+@keyframes exv-sq-arm   { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(-133deg)} }
+/* pistol */
+@keyframes exv-ps-shin  { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(30deg)} }
+@keyframes exv-ps-thigh { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(-118deg)} }
+@keyframes exv-ps-torso { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(136deg)} }
+@keyframes exv-ps-free  { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(-64deg)} }
+@keyframes exv-ps-arm   { 0%,100%{transform:rotate(-8deg)} 45%,58%{transform:rotate(-86deg)} }
+/* reverse lunge */
+@keyframes exv-lg-shinF { 0%,12%,92%,100%{transform:rotate(0deg)} 42%,58%{transform:rotate(9deg)} }
+@keyframes exv-lg-thighF{ 0%,12%,92%,100%{transform:rotate(0deg)} 42%,58%{transform:rotate(-64deg)} }
+@keyframes exv-lg-torso { 0%,12%,92%,100%{transform:rotate(0deg)} 42%,58%{transform:rotate(58deg)} }
+@keyframes exv-lg-thighR{ 0%,8%,96%,100%{transform:rotate(0deg)} 42%,58%{transform:rotate(46deg)} }
+@keyframes exv-lg-shinR { 0%,8%,96%,100%{transform:rotate(0deg)} 42%,58%{transform:rotate(64deg)} }
+/* romanian deadlift (hinge) */
+@keyframes exv-hg-shin  { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(7deg)} }
+@keyframes exv-hg-thigh { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(-19deg)} }
+@keyframes exv-hg-torso { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(84deg)} }
+@keyframes exv-hg-arm   { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(-84deg)} }
+@keyframes exv-hg-head  { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(-24deg)} }
+/* glute bridge */
+@keyframes exv-bg-torso { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(-26deg)} }
+@keyframes exv-bg-thigh { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(34deg)} }
+/* leg press */
+@keyframes exv-lp-plate { 0%,100%{transform:translate(0,0)} 45%,58%{transform:translate(15px,-14px)} }
+@keyframes exv-lp-thigh { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(24deg)} }
+@keyframes exv-lp-shin  { 0%,100%{transform:rotate(0deg)} 45%,58%{transform:rotate(-34deg)} }
+/* plank bob (existing) + holds */
+@keyframes exv-pk-bob { from{transform:translateY(0)} to{transform:translateY(-2.5px)} }
+@keyframes exv-hw-rock { 0%,100%{transform:rotate(0deg)} 50%{transform:rotate(2.4deg)} }
+`;
+
+// ---------- LEGS ----------
+function squatS(){const cyc='2s ease-in-out infinite';
+  return ground()+shadow(116,32)+grp(GLOW,
+    limb('M106 129.5 L125 129.5',6,'far')
+    +jt(113,128,`exv-sq-shin ${cyc}`, limb('M113 128 L111 105',9,'far')
+      +jt(111,105,`exv-sq-thigh ${cyc}`, limb('M111 105 L107 80',10.5,'far')))
+    +limb('M111 129.5 L131 129.5',6,'lb2')
+    +jt(118,128,`exv-sq-shin ${cyc}`, limb('M118 128 L116 105',9.5,'lb2')
+      +jt(116,105,`exv-sq-thigh ${cyc}`, limb('M116 105 L112 80',11)
+        +mus(116.5,91,3.6,8.5,-9)+mus(106.5,82,4.5,3.6)
+        +jt(112,80,`exv-sq-torso ${cyc}`, limb('M112 80 L110 65',14,'cap')+limb('M110 65 L108 53',15,'cap')
+          +limb('M108.3 53 L109 47.5',7)+head(109.5,43)
+          +jt(108,55,`exv-sq-arm ${cyc}`, limb('M108 55 L110.5 70',8)+limb('M110.5 70 L109.5 84',7,'lb2')+`<circle cx="109.5" cy="86" r="2.6" fill="${COL.lb2}"/>`)))))
+  +cue('2s','INHALE');}
+
+function pistolS(){const cyc='2.6s ease-in-out infinite';
+  return ground()+shadow(110,40)+grp(GLOW,
+    limb('M104 129.5 L124 129.5',6,'lb2')
+    +jt(111,128,`exv-ps-shin ${cyc}`, limb('M111 128 L109 105',9.5,'lb2')
+      +jt(109,105,`exv-ps-thigh ${cyc}`, limb('M109 105 L105 80',11)
+        +mus(109.5,91,3.6,8.5,-9)
+        +jt(105,80,`exv-ps-torso ${cyc}`, limb('M105 80 L103 65',14,'cap')+limb('M103 65 L101 53',15,'cap')
+          +limb('M101.3 53 L102 47.5',7)+head(102.5,43)
+          // both arms reach forward for balance
+          +jt(101,56,`exv-ps-arm ${cyc}`, limb('M101 56 L104 72',7.5,'far')+limb('M104 72 L103 85',6.5,'far'))
+          +jt(102,56,`exv-ps-arm ${cyc}`, limb('M102 56 L105 72',8)+limb('M105 72 L104 85',7,'lb2')+`<circle cx="104" cy="87" r="2.6" fill="${COL.lb2}"/>`))
+        // free leg swings forward straight from the hip
+        +jt(105,80,`exv-ps-free ${cyc}`, limb('M105 80 L102 104',9,'far')+limb('M102 104 L100 126',8,'far')+limb('M100 126 L106 129',5.5,'far')+`<circle cx="105" cy="80" r="4" fill="${COL.far}"/>`))))
+  +cue('2.6s','INHALE');}
+
+function lungeS(){const cyc='2.4s ease-in-out infinite';
+  return ground()+shadow(112,44)+grp(GLOW,
+    limb('M118 129.5 L138 129.5',6,'lb2')
+    +jt(125,128,`exv-lg-shinF ${cyc}`, limb('M125 128 L123 106',9.5,'lb2')
+      +jt(123,106,`exv-lg-thighF ${cyc}`, limb('M123 106 L120 81',11)
+        +mus(124,93,3.4,8,-8)
+        // rear leg hangs from the hip and sweeps back
+        +jt(120,83,`exv-lg-thighR ${cyc}`, limb('M120 83 L117 107',10,'far')
+          +jt(117,107,`exv-lg-shinR ${cyc}`, limb('M117 107 L115 128',8.5,'far')+limb('M115 128 L122 130',5.5,'far')))
+        +jt(120,81,`exv-lg-torso ${cyc}`, limb('M120 81 L118 65',14,'cap')+limb('M118 65 L116 53',15,'cap')
+          +limb('M116.3 53 L117 47.5',7)+head(117.5,43)
+          +limb('M116 57 L118 76',7.5)+limb('M118 76 L117 90',6.5,'lb2')))))
+  ;}
+
+function hingeS(){const cyc='2.6s ease-in-out infinite';
+  return ground()+shadow(112,36)+grp(GLOW,
+    limb('M102 129.5 L122 129.5',6,'lb2')
+    +jt(109,128,`exv-hg-shin ${cyc}`, limb('M109 128 L108 106',9.5,'lb2')
+      +jt(108,106,`exv-hg-thigh ${cyc}`, limb('M108 106 L106 81',11)
+        +mus(110,93,3.4,9,-6)
+        +jt(106,81,`exv-hg-torso ${cyc}`, limb('M106 81 L104 64',14,'cap')+limb('M104 64 L102 52',15,'cap')
+          +jt(102.5,52,`exv-hg-head ${cyc}`, limb('M102.3 52 L103 46.5',7)+head(103.5,42))
+          // arms hang plumb, bar (end-on plate) slides down the thighs
+          +jt(103,56,`exv-hg-arm ${cyc}`, limb('M103 56 L104 76',8)+limb('M104 76 L104 93',7,'lb2')
+            +plate(104,96,7.5)+`<circle cx="104" cy="96" r="2.2" fill="#4d7fb5"/>`))))
+  )+cue('2.6s','INHALE');}
+
+function bridgeS(){const cyc='2.4s ease-in-out infinite';
+  return ground()+shadow(104,58)+grp(GLOW,
+    // head + shoulders stay on the ground, arms flat at sides
+    head(52,124)+limb('M59 125.5 L64 126',7)
+    +limb('M66 129 L98 130',5.5,'lb2')
+    +jt(66,124,`exv-bg-torso ${cyc}`,
+      limb('M66 124 L94 125',15,'cap')+limb('M94 125 L112 125.5',13,'cap')
+      +mus(106,121,7,4.5,-4)
+      // thigh counter-rotates so the knee stays over the foot
+      +jt(112,125.5,`exv-bg-thigh ${cyc}`, limb('M112 125.5 L128 110',10.5)))
+    // shin fixed: foot planted
+    +limb('M128 110 L131 128',9,'lb2')+limb('M131 128 L139 130',6,'lb2'))
+  +cue('2.4s','EXHALE');}
+
+function legpressS(){const cyc='2.4s ease-in-out infinite';
+  return ground()+shadow(96,46)
+    // frame rails + base
+    +`<path d="M100 116 L152 64" stroke="#1b2a44" stroke-width="3" stroke-linecap="round"/>`
+    +`<path d="M56 129 L120 129" stroke="${EQ2}" stroke-width="3" stroke-linecap="round"/>`
+    // reclined seat pad
+    +`<rect x="50" y="86" width="46" height="7" rx="3" fill="#16273f" stroke="${EQ2}" stroke-width="1" transform="rotate(38 73 89)"/>`
+    +`<path d="M62 108 L58 128 M84 116 L86 128" stroke="${EQ2}" stroke-width="3.5" stroke-linecap="round"/>`
+    // sled plate slides on the rails
+    +grp(`animation:exv-lp-plate ${cyc}`,
+      `<path d="M118 100 L142 76" stroke="${EQ}" stroke-width="5" stroke-linecap="round"/>`
+      +`<path d="M118 100 L142 76" stroke="#16273f" stroke-width="2" stroke-linecap="round"/>`)
+    +grp(GLOW,
+      // reclined torso along the pad
+      head(56,80,7)+limb('M61 84 L65 87',7)
+      +limb('M65 87 L83 100',15,'cap')+limb('M83 100 L94 108',13,'cap')
+      +mus(88,108,4,7.5,42)
+      // arms grip side handle
+      +limb('M72 94 L84 106',7.5)+limb('M84 106 L80 116',6.5,'lb2')
+      // legs press the plate away
+      +jt(94,108,`exv-lp-thigh ${cyc}`, limb('M94 108 L110 88',11)
+        +jt(110,88,`exv-lp-shin ${cyc}`, limb('M110 88 L128 92',9,'lb2')+limb('M128 92 L133 86',6,'lb2')))
+      +jt(92,110,`exv-lp-thigh ${cyc}`, limb('M92 110 L108 90',10,'far')
+        +jt(108,90,`exv-lp-shin ${cyc}`, limb('M108 90 L126 94',8,'far'))))
+  +cue('2.4s','EXHALE');}
+
+// ---------- CORE / HOLDS ----------
+function plankS(){
+  return ground()+shadow(104,64)+grp(`${GLOW};animation:exv-pk-bob 2.6s ease-in-out infinite alternate`,
+    limb('M50 121 L68 119',7,'far')+limb('M68 119 L71 99',8,'far')
+    +limb('M122 108.5 L144 116.5',9.5,'far')+limb('M144 116.5 L163 126',8,'far')
+    +limb('M63 97 L92 102',15,'cap')+limb('M92 102 L118 107',12,'cap')
+    +limb('M56 95 L61.5 96.5',7)+head(50,93)
+    +limb('M118 107 L141 115',10.5)+limb('M141 115 L161 124.5',9,'lb2')+limb('M161 124.5 L167 130',7,'lb2')
+    +limb('M40 121.5 L60 119.5',8,'lb2')+limb('M60 119.5 L63 98',9)
+    +`<circle cx="39" cy="121.5" r="3.2" fill="${COL.lb2}"/>`
+    +mus(96,105.5,11,5,9));}
+
+function sideplankS(){
+  return ground()+shadow(112,58)+grp(`${GLOW};animation:exv-pk-bob 3s ease-in-out infinite alternate`,
+    // forearm support
+    limb('M70 129 L94 129',8,'lb2')+limb('M70 129 L76 106',8.5)
+    +`<circle cx="69" cy="129" r="3.2" fill="${COL.lb2}"/>`
+    // body straight diagonal, feet stacked
+    +limb('M78 104 L112 111',15,'cap')+limb('M112 111 L134 116',12,'cap')
+    +limb('M134 116 L162 126',10)+limb('M162 126 L170 129',6,'lb2')
+    +head(70,96)+limb('M74.5 99 L78 102',7)
+    // top arm straight up
+    +limb('M80 102 L84 78',8)+`<circle cx="84.5" cy="75.5" r="3.4" ${HD}/>`
+    +mus(108,112,8,4.5,10));}
+
+function hollowS(){
+  return ground()+shadow(110,60)+grp(`transform-origin:108px 126px;${GLOW};animation:exv-hw-rock 3s ease-in-out infinite`,
+    // dish shape: shoulders + legs hover, lumbar pressed down
+    head(60,103)+limb('M66 106 L71 109',7)
+    +limb('M71 110 L96 121',15,'cap')+limb('M96 121 L118 122',13,'cap')
+    +mus(100,122,9,4.5,2)
+    // arms extended past the ears
+    +limb('M73 106 L56 96',7.5)+limb('M56 96 L40 90',6.5,'lb2')
+    // legs long, hovering
+    +limb('M118 122 L146 115',10.5)+limb('M146 115 L170 108',8.5,'lb2')+limb('M170 108 L176 104',5.5,'lb2'));}
+KF += `
+/* run (existing) */
+@keyframes exv-rn-thigh { 0%{transform:rotate(-32deg)} 25%{transform:rotate(6deg)} 50%{transform:rotate(26deg)} 75%{transform:rotate(-28deg)} 100%{transform:rotate(-32deg)} }
+@keyframes exv-rn-shin  { 0%{transform:rotate(40deg)} 25%{transform:rotate(12deg)} 50%{transform:rotate(20deg)} 65%{transform:rotate(95deg)} 75%{transform:rotate(105deg)} 100%{transform:rotate(40deg)} }
+@keyframes exv-rn-arm   { 0%,100%{transform:rotate(30deg)} 50%{transform:rotate(-38deg)} }
+@keyframes exv-rn-bob   { from{transform:translateY(0)} to{transform:translateY(-3px)} }
+/* jumping jacks */
+@keyframes exv-jj-legL { 0%,100%{transform:rotate(0deg)} 45%,55%{transform:rotate(16deg)} }
+@keyframes exv-jj-legR { 0%,100%{transform:rotate(0deg)} 45%,55%{transform:rotate(-16deg)} }
+@keyframes exv-jj-armL { 0%,100%{transform:rotate(0deg)} 45%,55%{transform:rotate(-152deg)} }
+@keyframes exv-jj-armR { 0%,100%{transform:rotate(0deg)} 45%,55%{transform:rotate(152deg)} }
+@keyframes exv-jj-bob  { 0%,100%{transform:translateY(0)} 25%,75%{transform:translateY(-5px)} 45%,55%{transform:translateY(-1px)} }
+/* jab-cross: lead jab then rear cross */
+@keyframes exv-px-torso { 0%,100%{transform:rotate(0deg)} 12%,22%{transform:rotate(7deg)} 52%,62%{transform:rotate(13deg)} }
+@keyframes exv-px-up    { 0%,32%,100%{transform:rotate(0deg)} 12%,22%{transform:rotate(-40deg)} }
+@keyframes exv-px-fore  { 0%,32%,100%{transform:rotate(0deg)} 12%,22%{transform:rotate(112deg)} }
+@keyframes exv-px-up2   { 0%,40%,76%,100%{transform:rotate(0deg)} 52%,62%{transform:rotate(-52deg)} }
+@keyframes exv-px-fore2 { 0%,40%,76%,100%{transform:rotate(0deg)} 52%,62%{transform:rotate(124deg)} }
+@keyframes exv-px-hit   { 0%,8%,26%,48%,66%,100%{opacity:0} 14%,22%{opacity:.85} 54%,62%{opacity:.85} }
+/* front kick: chamber -> extend -> rechamber */
+@keyframes exv-kk-thigh { 0%,6%{transform:rotate(0deg)} 26%{transform:rotate(-84deg)} 44%,56%{transform:rotate(-76deg)} 74%{transform:rotate(-84deg)} 92%,100%{transform:rotate(0deg)} }
+@keyframes exv-kk-shin  { 0%,6%{transform:rotate(0deg)} 26%{transform:rotate(108deg)} 44%,56%{transform:rotate(4deg)} 74%{transform:rotate(108deg)} 92%,100%{transform:rotate(0deg)} }
+@keyframes exv-kk-torso { 0%,10%,90%,100%{transform:rotate(0deg)} 40%,60%{transform:rotate(-9deg)} }
+@keyframes exv-kk-hit   { 0%,36%,64%,100%{opacity:0} 46%,56%{opacity:.85} }
+/* knee strike */
+@keyframes exv-kn-thigh { 0%,8%{transform:rotate(0deg)} 38%,54%{transform:rotate(-98deg)} 86%,100%{transform:rotate(0deg)} }
+@keyframes exv-kn-shin  { 0%,8%{transform:rotate(0deg)} 38%,54%{transform:rotate(74deg)} 86%,100%{transform:rotate(0deg)} }
+@keyframes exv-kn-arm   { 0%,8%{transform:rotate(0deg)} 38%,54%{transform:rotate(38deg)} 86%,100%{transform:rotate(0deg)} }
+@keyframes exv-kn-torso { 0%,8%{transform:rotate(0deg)} 38%,54%{transform:rotate(11deg)} 86%,100%{transform:rotate(0deg)} }
+/* defensive slip */
+@keyframes exv-sl-lean { 0%,8%,42%,58%,92%,100%{transform:rotate(0deg)} 18%,30%{transform:rotate(-17deg)} 68%,80%{transform:rotate(17deg)} }
+@keyframes exv-sl-dip  { 0%,8%,42%,58%,92%,100%{transform:translateY(0)} 18%,30%,68%,80%{transform:translateY(5px)} }
+@keyframes exv-sl-jabL { 0%,60%,100%{opacity:0} 68%,80%{opacity:.7} }
+@keyframes exv-sl-jabR { 0%,10%,42%,100%{opacity:0} 18%,30%{opacity:.7} }
+/* footwork shuffle */
+@keyframes exv-fw-slide { 0%,100%{transform:translateX(-11px)} 38%,54%{transform:translateX(11px)} }
+@keyframes exv-fw-legF  { 0%,26%,58%,100%{transform:rotate(0deg)} 8%,18%{transform:rotate(-17deg)} }
+@keyframes exv-fw-legR  { 0%,34%,100%{transform:rotate(0deg)} 62%,74%{transform:rotate(15deg)} }
+@keyframes exv-fw-bob   { 0%,36%,56%,100%{transform:translateY(0)} 10%,20%{transform:translateY(-2.5px)} 64%,76%{transform:translateY(-2.5px)} }
+/* guard / awareness */
+@keyframes exv-gd-shift { 0%,100%{transform:translateX(-3px)} 45%,60%{transform:translateX(3px)} }
+@keyframes exv-gd-scan  { 0%,12%{transform:translateX(0)} 22%,38%{transform:translateX(-3.5px)} 50%,62%{transform:translateX(0)} 72%,88%{transform:translateX(3.5px)} 100%{transform:translateX(0)} }
+@keyframes exv-gd-ping  { 0%,100%{opacity:.25} 50%{opacity:.7} }
+`;
+
+// ---------- CARDIO / MARTIAL ----------
+function runS(){const leg='exv-rn-thigh 0.8s linear infinite',shin='exv-rn-shin 0.8s linear infinite',arm='exv-rn-arm 0.8s ease-in-out infinite',half=' -0.4s';
+  let dashes='';[58,76,94].forEach((y,i)=>{dashes+=`<line x1="22" y1="${y}" x2="52" y2="${y}" stroke="rgba(125,211,252,.35)" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="14 46" style="animation:exv-dash .9s linear infinite;animation-delay:${i*0.15}s"/>`});
+  return ground()+dashes+shadow(110,42)+grp('animation:exv-rn-bob 0.4s ease-in-out infinite alternate',
+    `<g style="${GLOW}" transform="rotate(7 110 88)">`
+    +jt(111,54,arm+half, limb('M111 54 L108 72',7.5,'far')+limb('M108 72 L120 67',6.5,'far')+`<circle cx="121.5" cy="66.5" r="2.8" fill="${COL.far}"/>`)
+    +jt(104,82,leg, limb('M104 82 L104 106',10,'far')+jt(104,106,shin, limb('M104 106 L104 128',8.5,'far')+limb('M104 128 L112 130',6,'far')))
+    +limb('M108 82 L112 68',13,'cap')+limb('M112 68 L116 52',14,'cap')
+    +limb('M116.5 51 L118.5 46.5',7)+head(120,42.5)
+    +jt(108,82,leg+half, limb('M108 82 L108 106',10.5)+mus(110,94,3.4,8)
+      +jt(108,106,shin+half, limb('M108 106 L108 128',9,'lb2')+limb('M108 128 L116 130',6.5,'lb2')+mus(106,114.5,2.8,6)))
+    +jt(117,54,arm, limb('M117 54 L114 72',8)+limb('M114 72 L127 67',7,'lb2')+`<circle cx="128.5" cy="66.5" r="3" fill="${COL.lb2}"/>`)
+    +`</g>`);}
+
+function jumpjackS(){const cyc='1s ease-in-out infinite';
+  return ground()+shadow(110,34)+grp(`${GLOW};animation:exv-jj-bob ${cyc}`,
+    jt(106,104,`exv-jj-legL ${cyc}`, limb('M106 104 L103 128',10)+limb('M103 128 L96 130.5',6,'lb2'))
+    +jt(114,104,`exv-jj-legR ${cyc}`, limb('M114 104 L117 128',10)+limb('M117 128 L124 130.5',6,'lb2'))
+    +limb('M107 106 L110 88',15,'cap')+limb('M113 106 L110 88',15,'cap')+limb('M110 106 L110 67',14,'cap')
+    +head(110,54,7.3)
+    +mus(103,72,3.8,3.2)+mus(117,72,3.8,3.2)
+    +jt(100,68,`exv-jj-armL ${cyc}`, limb('M100 68 L92 88',7.5)+limb('M92 88 L88 102',6.5,'lb2')+`<circle cx="87.5" cy="104" r="3" ${HD}/>`)
+    +jt(120,68,`exv-jj-armR ${cyc}`, limb('M120 68 L128 88',7.5)+limb('M128 88 L132 102',6.5,'lb2')+`<circle cx="132.5" cy="104" r="3" ${HD}/>`));}
+
+function punchS(){const cyc='1.6s ease-in-out infinite';
+  return ground()+shadow(106,42)
+    +grp(`animation:exv-px-hit 1.6s linear infinite`,`<g stroke="rgba(125,211,252,.8)" stroke-width="2" stroke-linecap="round"><line x1="152" y1="48" x2="160" y2="44"/><line x1="155" y1="56" x2="164" y2="56"/><line x1="152" y1="64" x2="160" y2="68"/></g>`)
+    +grp(GLOW,
+      limb('M78 130 L92 130',6,'lb2')+limb('M122 130 L136 130',6,'lb2')
+      +limb('M101 88 L93 109',10.5)+limb('M93 109 L85.5 128',9,'lb2')
+      +limb('M101 88 L115 109',10.5)+limb('M115 109 L127.5 128',9,'lb2')
+      +jt(101,88,`exv-px-torso ${cyc}`,
+        limb('M101 88 L103 76',14,'cap')+limb('M103 76 L107 58',15,'cap')
+        +limb('M107.8 57 L109.3 52.5',7)+head(110.5,48)
+        // rear arm throws the cross on the second beat
+        +jt(106,60,`exv-px-up2 ${cyc}`, limb('M106 60 L117 71',8)
+          +jt(117,71,`exv-px-fore2 ${cyc}`, limb('M117 71 L113.5 56',7,'lb2')+`<circle cx="113" cy="53.5" r="3.4" fill="${COL.lb2}"/>`))
+        // lead arm jabs on the first beat
+        +jt(107,59,`exv-px-up ${cyc}`, limb('M107 59 L119 68',8.5)+mus(109.5,60,4.8,3.8)+mus(114,64.5,6,2.8,37)
+          +jt(119,68,`exv-px-fore ${cyc}`, limb('M119 68 L123 54',7.5,'lb2')+`<circle cx="124" cy="51.5" r="3.8" ${HD}/>`))));}
+
+function kickS(){const cyc='2.2s ease-in-out infinite';
+  return ground()+shadow(104,44)
+    +grp(`animation:exv-kk-hit 2.2s linear infinite`,`<g stroke="rgba(125,211,252,.8)" stroke-width="2" stroke-linecap="round"><line x1="168" y1="76" x2="176" y2="72"/><line x1="171" y1="84" x2="180" y2="84"/><line x1="168" y1="92" x2="176" y2="96"/></g>`)
+    +grp(GLOW,
+      // planted support leg
+      limb('M86 130 L102 130',6,'lb2')+limb('M95 128 L96 108',9.5,'lb2')+limb('M96 108 L98 90',10.5)
+      +jt(98,88,`exv-kk-torso ${cyc}`,
+        limb('M98 88 L100 74',14,'cap')+limb('M100 74 L103 58',15,'cap')
+        +limb('M103.8 57 L105.3 52.5',7)+head(106.5,48)
+        // guard arms stay up
+        +limb('M103 60 L114 69',8)+limb('M114 69 L111 57',7,'lb2')+`<circle cx="110.5" cy="54.5" r="3.4" fill="${COL.lb2}"/>`
+        +limb('M101 61 L109 71',7.5,'far')+limb('M109 71 L105 60',6.5,'far'))
+      // kicking leg: chamber then snap out
+      +jt(98,90,`exv-kk-thigh ${cyc}`, limb('M98 90 L101 113',10.5)+mus(101,100,3.4,7.5,-6)
+        +jt(101,113,`exv-kk-shin ${cyc}`, limb('M101 113 L102 132',9,'lb2')+limb('M102 132 L109 133.5',5.5,'lb2'))));}
+
+function kneeS(){const cyc='1.7s ease-in-out infinite';
+  return ground()+shadow(104,42)+grp(GLOW,
+    // support leg
+    limb('M84 130 L100 130',6,'lb2')+limb('M93 128 L94 108',9.5,'lb2')+limb('M94 108 L96 90',10.5)
+    +jt(96,88,`exv-kn-torso ${cyc}`,
+      limb('M96 88 L98 74',14,'cap')+limb('M98 74 L101 58',15,'cap')
+      +limb('M101.8 57 L103.3 52.5',7)+head(104.5,48)
+      // clinch arms reach forward-up, pull down with the strike
+      +jt(101,60,`exv-kn-arm ${cyc}`, limb('M101 60 L118 62',8)+limb('M118 62 L132 58',7,'lb2')+`<circle cx="134.5" cy="57" r="3.4" fill="${COL.lb2}"/>`)
+      +jt(99,61,`exv-kn-arm ${cyc}`, limb('M99 61 L115 64',7.5,'far')+limb('M115 64 L129 60',6.5,'far')))
+    // rear leg drives the knee up
+    +jt(96,90,`exv-kn-thigh ${cyc}`, limb('M96 90 L99 113',10.5)+mus(99,100,3.4,7.5,-6)
+      +jt(99,113,`exv-kn-shin ${cyc}`, limb('M99 113 L100 131',9,'lb2')+limb('M100 131 L106 132.5',5.5,'lb2'))));}
+
+function slipS(){const cyc='2.8s ease-in-out infinite';
+  return ground()+shadow(110,34)
+    // imaginary punch line the head slips under
+    +`<line x1="70" y1="49" x2="150" y2="49" stroke="rgba(125,211,252,.4)" stroke-width="1.5" stroke-dasharray="5 6"/>`
+    +`<line x1="128" y1="49" x2="152" y2="49" stroke="rgba(125,211,252,.7)" stroke-width="2.5" stroke-linecap="round" style="animation:exv-sl-jabR ${cyc}"/>`
+    +`<line x1="68" y1="49" x2="92" y2="49" stroke="rgba(125,211,252,.7)" stroke-width="2.5" stroke-linecap="round" style="animation:exv-sl-jabL ${cyc}"/>`
+    +grp(GLOW,
+      // planted wide legs
+      limb('M88 130 L102 130',6,'lb2')+limb('M118 130 L132 130',6,'lb2')
+      +limb('M108 96 L96 112',10.5)+limb('M96 112 L94.5 128',9,'lb2')
+      +limb('M112 96 L124 112',10.5)+limb('M124 112 L125.5 128',9,'lb2')
+      // upper body slips side to side under the line
+      +grp(`animation:exv-sl-dip ${cyc}`,
+        jt(110,96,`exv-sl-lean ${cyc}`,
+          limb('M110 96 L110 80',15,'cap')+limb('M110 80 L110 66',14,'cap')
+          +limb('M110 64 L110 60.5',7)+head(110,55.5,7.2)
+          +mus(103,82,3.6,6,10)+mus(117,82,3.6,6,-10)
+          // tight guard, both fists at the chin
+          +limb('M104 68 L96 80',7.5)+limb('M96 80 L102 62',6.5,'lb2')+`<circle cx="103" cy="60" r="3.4" ${HD}/>`
+          +limb('M116 68 L124 80',7.5)+limb('M124 80 L118 62',6.5,'lb2')+`<circle cx="117" cy="60" r="3.4" ${HD}/>`)));}
+
+function footworkS(){const cyc='1.8s ease-in-out infinite';
+  return ground()
+    +`<line x1="40" y1="126" x2="180" y2="126" stroke="rgba(125,211,252,.18)" stroke-width="1.5" stroke-dasharray="3 9"/>`
+    +shadow(110,40)+grp(`animation:exv-fw-slide ${cyc}`,
+      grp(`${GLOW};animation:exv-fw-bob ${cyc}`,
+        // stance legs step quickly
+        jt(104,96,`exv-fw-legF ${cyc}`, limb('M104 96 L96 111',10.5)+limb('M96 111 L92 127',9,'lb2')+limb('M92 129.5 L102 129.5',5.5,'lb2'))
+        +jt(112,96,`exv-fw-legR ${cyc}`, limb('M112 96 L122 111',10,'far')+limb('M122 111 L126 127',8.5,'far')+limb('M126 129.5 L136 129.5',5,'far'))
+        +limb('M108 96 L110 80',14,'cap')+limb('M110 80 L112 62',15,'cap')
+        +limb('M112.6 61 L113.8 56.5',7)+head(115,52)
+        // guard stays up while shuffling
+        +limb('M111 64 L121 73',8)+limb('M121 73 L118 60',7,'lb2')+`<circle cx="117.5" cy="57.5" r="3.4" fill="${COL.lb2}"/>`
+        +limb('M109 65 L116 74',7.5,'far')+limb('M116 74 L112 63',6.5,'far')));}
+
+function guardS(){const cyc='5s ease-in-out infinite';
+  return ground()+shadow(110,34)
+    // awareness pings left + right
+    +`<path d="M52 62 a14 14 0 0 1 0 20" stroke="#38bdf8" stroke-width="1.5" fill="none" transform="rotate(180 52 72)" style="animation:exv-gd-ping 2.6s ease-in-out infinite"/>`
+    +`<path d="M168 62 a14 14 0 0 1 0 20" stroke="#38bdf8" stroke-width="1.5" fill="none" style="animation:exv-gd-ping 2.6s ease-in-out infinite;animation-delay:1.3s"/>`
+    +grp(`${GLOW};animation:exv-gd-shift ${cyc}`,
+      // staggered stance (near foot slightly lower/closer)
+      limb('M92 128.5 L104 128.5',6,'far')+limb('M116 130.5 L129 130.5',6.5,'lb2')
+      +limb('M104 100 L98 114',10)+limb('M98 114 L97 127',9,'far')
+      +limb('M116 100 L122 115',10.5)+limb('M122 115 L122.5 129',9,'lb2')
+      +limb('M107 102 L110 84',15,'cap')+limb('M113 102 L110 84',15,'cap')+limb('M110 102 L110 64',14,'cap')
+      // open palms up at chest height, non-aggressive
+      +limb('M102 68 L90 80',7.5)+limb('M90 80 L86 66',6.5,'lb2')+`<ellipse cx="85" cy="61.5" rx="3" ry="4.6" fill="${COL.lb}" stroke="#4d7fb5" stroke-width="1"/>`
+      +limb('M118 68 L130 80',7.5)+limb('M130 80 L134 66',6.5,'lb2')+`<ellipse cx="135" cy="61.5" rx="3" ry="4.6" fill="${COL.lb}" stroke="#4d7fb5" stroke-width="1"/>`
+      // scanning head
+      +grp(`animation:exv-gd-scan ${cyc}`, head(110,51,7.3)+`<path d="M106 49 h8" stroke="#7dd3fc" stroke-width="1.6" stroke-linecap="round" opacity=".9"/>`));}
+KF += `
+/* yoga */
+@keyframes exv-dd-sway { from{transform:translateY(0)} to{transform:translateY(-2.5px)} }
+@keyframes exv-cc-sA   { 0%,100%{transform:rotate(14deg)} 45%,58%{transform:rotate(-14deg)} }
+@keyframes exv-cc-sB   { 0%,100%{transform:rotate(-14deg)} 45%,58%{transform:rotate(14deg)} }
+@keyframes exv-cc-head { 0%,100%{transform:rotate(-16deg)} 45%,58%{transform:rotate(20deg)} }
+@keyframes exv-ch-breathe { from{transform:translateY(0)} to{transform:translateY(-1.6px)} }
+@keyframes exv-wr-hold { from{transform:translateY(0)} to{transform:translateY(-1.8px)} }
+@keyframes exv-wr-sheen{ 0%,100%{opacity:.3} 50%{opacity:.85} }
+@keyframes exv-fd-deep { from{transform:rotate(0deg)} to{transform:rotate(6deg)} }
+@keyframes exv-fd-arm  { from{transform:rotate(0deg)} to{transform:rotate(-5deg)} }
+@keyframes exv-st-fold { from{transform:rotate(-2deg)} to{transform:rotate(46deg)} }
+@keyframes exv-st-arm  { from{transform:rotate(0deg)} to{transform:rotate(-18deg)} }
+/* generic (existing) */
+@keyframes exv-gn-fore  { from{transform:rotate(0deg)} to{transform:rotate(-118deg)} }
+@keyframes exv-gn-sheen { 0%,100%{opacity:.45} 50%{opacity:1} }
+`;
+
+// ---------- YOGA ----------
+function downdogS(){
+  return ground()+shadow(108,56)+grp(`${GLOW};animation:exv-dd-sway 3.6s ease-in-out infinite alternate`,
+    // far-side arm + leg
+    limb('M72 128 L92 99',8,'far')+limb('M116 74 L132 98',10,'far')+limb('M132 98 L152 126',8.5,'far')
+    // legs: hips apex to feet, soft knee
+    +limb('M112 72 L128 96',11)+limb('M128 96 L148 126',9,'lb2')+limb('M148 126 L146 131',6,'lb2')
+    // torso shoulders -> hips (highest point)
+    +limb('M88 98 L100 85',14,'cap')+limb('M100 85 L112 72',13,'cap')
+    // arms shoulders -> hands planted
+    +limb('M88 98 L66 128',8.5)+`<circle cx="65" cy="129" r="3.2" fill="${COL.lb2}"/>`
+    // head hangs between the arms
+    +limb('M86 100 L82 104',6.5)+head(78,109,6.8)
+    +mus(122,88,3.6,7.5,40));}
+
+function catcowS(){const cyc='4s ease-in-out infinite';
+  return ground()+shadow(112,50)+grp(GLOW,
+    // far-side supports
+    limb('M86 128 L90 100',8,'far')+limb('M134 100 L138 128',9,'far')
+    // near supports: arm + thigh, shin flat on the ground
+    +limb('M78 128.5 L84 99',8.5)+`<circle cx="77.5" cy="129.5" r="3" fill="${COL.lb2}"/>`
+    +limb('M128 101 L132 128',10)+limb('M132 128 L152 129.5',8,'lb2')
+    // hinged spine: two segments meet mid-back
+    +jt(84,99,`exv-cc-sA ${cyc}`, limb('M84 99 L106 95',13.5,'cap')+mus(96,92,6.5,3.4,-8))
+    +jt(128,101,`exv-cc-sB ${cyc}`, limb('M128 101 L106 95',13.5,'cap'))
+    // head arcs up (cow) and tucks (cat)
+    +jt(84,99,`exv-cc-head ${cyc}`, limb('M84 99 L77 93.5',7)+head(72.5,90,6.6)))
+  +cue('4s','EXHALE');}
+
+function childsS(){
+  return ground()+shadow(88,52)+grp(GLOW,
+    // shins flat, hips resting on heels
+    limb('M84 127 L116 128.5',9,'lb2')+limb('M112 122 L88 126',12)
+    +grp('animation:exv-ch-breathe 3.8s ease-in-out infinite alternate',
+      // folded torso draped over the thighs
+      limb('M108 117 L90 112.5',14,'cap')+limb('M90 112.5 L74 116',13,'cap')
+      +mus(92,109,7,3.2,-6))
+    // head resting near the ground, arms long on the floor
+    +head(63,120,6.5)
+    +limb('M74 117 L56 123.5',7)+limb('M56 123.5 L40 126.5',6,'lb2')
+    +`<circle cx="38.5" cy="127" r="2.8" fill="${COL.lb2}"/>`
+    +limb('M78 119 L60 125.5',6.5,'far')+limb('M60 125.5 L46 128.5',5.5,'far'));}
+
+function warriorS(){
+  return ground()+shadow(114,58)+grp(GLOW,
+    // rear leg straight to the flat back foot
+    limb('M66 130.5 L82 130.5',6,'lb2')+limb('M74 129 L96 112',10,'lb2')+limb('M96 112 L114 97',10.5)
+    // front leg bent 90: thigh level, shin vertical
+    +limb('M114 97 L146 99',11)+limb('M146 99 L150 127',9.5,'lb2')+limb('M150 129.5 L164 129.5',6,'lb2')
+    +mus(130,95,7,3.6,3)
+    +grp('animation:exv-wr-hold 3s ease-in-out infinite alternate',
+      // proud upright torso
+      limb('M114 97 L113 80',15,'cap')+limb('M113 80 L112 65',14,'cap')
+      // arms reach opposite directions in a T
+      +limb('M112 68 L150 65.5',7.5)+`<circle cx="153" cy="65.3" r="3.2" ${HD}/>`
+      +limb('M112 68 L76 66',7,'far')+`<circle cx="73" cy="65.8" r="3" fill="${COL.far}" stroke="#4d7fb5" stroke-width="1"/>`
+      +limb('M111.8 64 L111.5 58.5',7)+head(111,53,7.2)
+      +`<path d="M113 51.5 h5" stroke="#7dd3fc" stroke-width="1.5" stroke-linecap="round" style="animation:exv-wr-sheen 3s ease-in-out infinite"/>`));}
+
+function foldS(){
+  return ground()+shadow(108,30)+grp(GLOW,
+    // legs tall, slight knee softness
+    limb('M100 130.5 L116 130.5',6,'lb2')+limb('M108 128 L107 106',9.5)+limb('M107 106 L106 84',11)
+    +mus(103.5,95,3,7.5,-3)
+    // torso hangs from the hips and gently deepens
+    +jt(106,84,'exv-fd-deep 3.2s ease-in-out infinite alternate',
+      limb('M106 84 L98 100',14,'cap')+limb('M98 100 L94 113',13,'cap')
+      +limb('M93.5 114 L92.5 117.5',6.5)+head(91.5,122,6.8)
+      +jt(95,110,'exv-fd-arm 3.2s ease-in-out infinite alternate',
+        limb('M95 110 L99 121',7)+limb('M99 121 L100.5 128.5',6,'lb2')+`<circle cx="100.8" cy="129.5" r="2.8" fill="${COL.lb2}"/>`)));}
+
+function stretchS(){
+  return ground()+shadow(118,48)+grp(GLOW,
+    limb('M86 123 L124 121.5',11)+limb('M124 121.5 L156 124',9,'lb2')+limb('M156 124 L159 114.5',7,'lb2')
+    +mus(104,126.5,11,3.2)
+    +limb('M86 123 L85 112',14,'cap')
+    +jt(85,113,'exv-st-fold 3s ease-in-out infinite alternate',
+      limb('M85 113 L82 84',13.5,'cap')+limb('M81.8 84 L81.3 79',7)+head(81,74)
+      +jt(83,89,'exv-st-arm 3s ease-in-out infinite alternate',
+        limb('M83 89 L96 102',7.5)+limb('M96 102 L109 111',6.5,'lb2')+`<circle cx="110.5" cy="112" r="2.6" fill="${COL.lb2}"/>`)));}
+
+// ---------- BREATH (parametric) ----------
+const PH_COL={in:'#38bdf8',hold:'#a78bfa',ex:'#93c5fd'};
+function breathBuild(p,cfg){
+  const total=cfg.phases.reduce((s,x)=>s+x.d,0);
+  let acc=0;
+  const marks=cfg.phases.map(ph=>{const m={...ph,c:PH_COL[ph.k],s:acc/total*100,e:(acc+ph.d)/total*100};acc+=ph.d;return m;});
+  const P=v=>v.toFixed(2)+'%';
+  const scaleKF=(lo,hi,withStroke)=>{
+    let v0=lo,out=[`0%{transform:scale(${lo})${withStroke?`;stroke:${marks[0].c}`:''};animation-timing-function:ease-in-out}`];
+    marks.forEach((m,i)=>{
+      const v1=m.k==='in'?hi:m.k==='ex'?lo:v0;
+      if(i>0&&withStroke){
+        const dt=Math.min(1.6,(m.e-m.s)*0.2), vd=v0+(v1-v0)*0.05;
+        out.push(`${P(m.s+dt)}{transform:scale(${vd.toFixed(3)});stroke:${m.c};animation-timing-function:ease-in-out}`);
+      }
+      out.push(`${P(m.e)}{transform:scale(${v1})${withStroke?`;stroke:${m.c}`:''};animation-timing-function:ease-in-out}`);
+      v0=v1;
+    });
+    return out.join(' ');
+  };
+  KF+=`@keyframes exv-${p}-ring { ${scaleKF(1,cfg.ringHi||1.24,true)} }\n`;
+  KF+=`@keyframes exv-${p}-torso { ${scaleKF(1,cfg.chestHi||1.05,false)} }\n`;
+  if(cfg.belly) KF+=`@keyframes exv-${p}-belly { ${scaleKF(1,1.3,false)} }\n`;
+  marks.forEach((m,i)=>{
+    let kf;
+    if(m.s===0) kf=`0%,${P(Math.max(m.e-1.2,1))}{opacity:1} ${P(Math.min(m.e+1,99))},100%{opacity:0}`;
+    else if(m.e>=99.9) kf=`0%,${P(m.s-1)}{opacity:0} ${P(m.s+1.2)},100%{opacity:1}`;
+    else kf=`0%,${P(m.s-1)}{opacity:0} ${P(m.s+1.2)},${P(m.e-1.2)}{opacity:1} ${P(m.e+1)},100%{opacity:0}`;
+    KF+=`@keyframes exv-${p}-t${i} { ${kf} }\n`;
+  });
+  if(cfg.square){
+    const ORIG=[[64,36],[156,36],[156,128],[64,128]];
+    const LINES=[[64,36,156,36,'scaleX'],[156,36,156,128,'scaleY'],[156,128,64,128,'scaleX'],[64,128,64,36,'scaleY']];
+    marks.forEach((m,i)=>{
+      KF+=`@keyframes exv-${p}-e${i} { 0%${m.s>0?`,${P(m.s)}`:''}{transform:${LINES[i][4]}(0.004)} ${P(m.e)},100%{transform:${LINES[i][4]}(1)} }\n`;
+    });
+    cfg._sq=marks.map((m,i)=>{
+      const[x1,y1,x2,y2,ax]=LINES[i];
+      return `<g style="transform-origin:${x1}px ${y1}px;animation:exv-${p}-e${i} ${total}s linear infinite"><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${m.c}" stroke-width="1.6" vector-effect="non-scaling-stroke" stroke-linecap="round" opacity=".8"/></g>`;
+    }).join('');
+  }
+  return ()=>{
+    const txt=`font-family="Orbitron,sans-serif" font-size="9" letter-spacing="3" text-anchor="middle"`;
+    let out='';
+    if(!cfg.square){
+      out+=`<circle cx="110" cy="84" r="30" fill="none" stroke="#38bdf8" stroke-width="1.5" opacity=".55" style="transform-origin:110px 84px;animation:exv-${p}-ring ${total}s infinite"/>`;
+      out+=`<circle cx="110" cy="84" r="42" fill="none" stroke="#38bdf8" stroke-width="1" opacity=".3" style="transform-origin:110px 84px;animation:exv-${p}-ring ${total}s infinite"/>`;
+    } else out+=cfg._sq;
+    out+=`<ellipse cx="110" cy="123" rx="32" ry="3" fill="rgba(56,189,248,.10)"/>`;
+    // seated meditator
+    out+=grp(GLOW,
+      limb('M103 99 L79 110.5',10)+limb('M117 99 L141 110.5',10)
+      +limb('M79 110.5 L108 117.5',8,'lb2')+limb('M141 110.5 L112 117.5',8,'lb2')
+      +grp(`transform-origin:110px 97px;animation:exv-${p}-torso ${total}s infinite`,
+        `<path d="M96.5 66 Q110 60.5 123.5 66 L120.5 96 Q110 100.5 99.5 96 Z" fill="#2a4a6e" stroke="#4d7fb5" stroke-width="1"/>`
+        +(cfg.belly?`<g style="transform-origin:110px 96px;animation:exv-${p}-belly ${total}s infinite"><ellipse cx="110" cy="90" rx="8.5" ry="6.5" fill="rgba(56,189,248,.2)" stroke="rgba(125,211,252,.6)" stroke-width="1"/></g>`:'')
+        +limb('M110 60 L110 64',7)+head(110,54.5,7.3))
+      +(cfg.belly
+        ? limb('M97.5 68 L91 83',7.5)+limb('M91 83 L102 92',6.5,'lb2')+`<circle cx="103.5" cy="93" r="2.6" fill="${COL.lb2}"/>`
+          +limb('M122.5 68 L129 83',7.5)+limb('M129 83 L118 92',6.5,'lb2')+`<circle cx="116.5" cy="93" r="2.6" fill="${COL.lb2}"/>`
+        : limb('M97.5 68 L89.5 87',7.5)+limb('M89.5 87 L85.5 107',6.5,'lb2')+`<circle cx="85" cy="109" r="2.6" fill="${COL.lb2}"/>`
+          +limb('M122.5 68 L130.5 87',7.5)+limb('M130.5 87 L134.5 107',6.5,'lb2')+`<circle cx="135" cy="109" r="2.6" fill="${COL.lb2}"/>`));
+    marks.forEach((m,i)=>{
+      out+=`<text x="110" y="24" ${txt} fill="${m.c}" style="animation:exv-${p}-t${i} ${total}s linear infinite">${m.t}</text>`;
+    });
+    return out;
+  };
+}
+const breatheboxS=breathBuild('bx',{square:true,phases:[
+  {k:'in',t:'INHALE 4',d:4},{k:'hold',t:'HOLD 4',d:4},{k:'ex',t:'EXHALE 4',d:4},{k:'hold',t:'HOLD 4',d:4}]});
+const breathe478S=breathBuild('b78',{ringHi:1.26,phases:[
+  {k:'in',t:'INHALE 4',d:4},{k:'hold',t:'HOLD 7',d:7},{k:'ex',t:'EXHALE 8',d:8}]});
+const breathediaS=breathBuild('dia',{belly:true,chestHi:1.02,ringHi:1.18,phases:[
+  {k:'in',t:'INHALE 4',d:4},{k:'ex',t:'EXHALE 6',d:6}]});
+const breathecohS=breathBuild('coh',{ringHi:1.24,phases:[
+  {k:'in',t:'INHALE 5.5',d:5.5},{k:'ex',t:'EXHALE 5.5',d:5.5}]});
+
+const FAMS = [
+  ['PUSH', {pushup:pushupS, benchpress:benchpressS, seatedpress:seatedpressS, overheadpress:overheadpressS}],
+  ['PULL', {pull:pullS, pullneg:pullnegS, pulldown:pulldownS, row:rowS, seatedrow:seatedrowS, pullapart:pullapartS, dip:dipS, curl:curlS}],
+  ['LEGS', {squat:squatS, pistol:pistolS, lunge:lungeS, hinge:hingeS, bridge:bridgeS, legpress:legpressS}],
+  ['CORE', {plank:plankS, sideplank:sideplankS, hollow:hollowS}],
+  ['CARDIO-MARTIAL', {jumpjack:jumpjackS, run:runS, punch:punchS, kick:kickS, knee:kneeS, slip:slipS, footwork:footworkS, guard:guardS}],
+  ['YOGA', {downdog:downdogS, catcow:catcowS, childs:childsS, warrior:warriorS, fold:foldS, stretch:stretchS}],
+  ['BREATH', {breathebox:breatheboxS, breathe478:breathe478S, breathedia:breathediaS, breathecoh:breathecohS}],
+];
+const root=document.getElementById('root');
+root.innerHTML = FAMS.map(([name,scenes])=>`<div class="fam" id="fam-${name.toLowerCase().replace(/\W+/g,'')}"><h2>${name}</h2><div class="grid">${
+  Object.entries(scenes).map(([k,fn])=>`<div class="cell"><svg viewBox="0 0 220 150"><style>${KF}</style><defs><linearGradient id="exvMus" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f97316"/><stop offset="1" stop-color="#ef4444"/></linearGradient></defs>${fn()}</svg><div class="lbl">${k}</div></div>`).join('')
+}</div></div>`).join('');

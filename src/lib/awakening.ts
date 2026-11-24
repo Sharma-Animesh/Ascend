@@ -62,8 +62,8 @@ export function anyHealthFlag(flags: HealthFlags): boolean {
 export const EQUIPMENT_OPTIONS = ['none', 'bands', 'dumbbells', 'pull-up bar', 'full gym'] as const
 
 export const EXPERIENCE_OPTIONS = [
-  { id: 'new', label: 'Newly Awakened', desc: 'New to structured training' },
-  { id: 'returning', label: 'Returning Hunter', desc: 'Trained before — coming back after a break' },
+  { id: 'new', label: 'Newly Ascended', desc: 'New to structured training' },
+  { id: 'returning', label: 'Returning Ascendant', desc: 'Trained before — coming back after a break' },
   { id: 'experienced', label: 'Seasoned Veteran', desc: 'Training consistently for a year or more' },
 ] as const
 
@@ -115,7 +115,7 @@ export function toggleEquipment(current: string[], item: string): string[] {
 
 /**
  * Suggest a physique archetype from goal + BMI + experience.
- * The Hunter may always override — this is a suggestion, never a mandate.
+ * The Ascendant may always override — this is a suggestion, never a mandate.
  */
 export function suggestArchetype(
   goal: string | null,

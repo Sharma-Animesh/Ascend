@@ -30,8 +30,8 @@ const QUICK_LINKS = [
   },
   {
     to: '/app/admin/users',
-    label: 'Hunter Registry',
-    desc: 'Review Hunters and manage admin roles',
+    label: 'Ascendant Registry',
+    desc: 'Review Ascendants and manage admin roles',
     icon: Users,
   },
   {
@@ -105,7 +105,7 @@ export default function AdminHome() {
   }, [])
 
   const tiles = [
-    { label: 'Total Hunters', value: kpis?.hunters, icon: Users },
+    { label: 'Total Ascendants', value: kpis?.hunters, icon: Users },
     { label: 'Workouts Logged', value: kpis?.workouts, icon: Swords },
     { label: 'Quests Completed', value: kpis?.questsCompleted, icon: ScrollText },
     { label: 'Exercises', value: kpis?.exercises, icon: Dumbbell },
@@ -182,15 +182,15 @@ export default function AdminHome() {
         </div>
       </SystemPanel>
 
-      {/* Recent hunters */}
-      <SystemPanel title="Recently Awakened Hunters" icon={<Users size={14} className="text-gold" />}>
+      {/* Recent ascendants */}
+      <SystemPanel title="Recently Ascended" icon={<Users size={14} className="text-gold" />}>
         {recent === null && !error ? (
           <InlineLoader label="Scanning registry" />
         ) : !recent || recent.length === 0 ? (
           <EmptyState
             icon={<Users size={30} />}
-            title="No Hunters yet"
-            hint="New Hunters will appear here as soon as they awaken."
+            title="No Ascendants yet"
+            hint="New Ascendants will appear here as soon as they ascend."
           />
         ) : (
           <ul className="divide-y divide-line/50">
@@ -205,12 +205,12 @@ export default function AdminHome() {
                   className="flex min-h-[56px] items-center gap-3 py-2.5"
                 >
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line bg-abyss font-display text-xs font-bold text-glow-soft">
-                    {(profile.display_name ?? 'H').slice(0, 1).toUpperCase()}
+                    {(profile.display_name ?? 'A').slice(0, 1).toUpperCase()}
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="flex items-center gap-2">
                       <span className="truncate text-sm font-bold text-ink">
-                        {profile.display_name ?? 'Unnamed Hunter'}
+                        {profile.display_name ?? 'Unnamed Ascendant'}
                       </span>
                       {profile.role === 'admin' && (
                         <span className="shrink-0 rounded-full border border-gold/50 bg-gold/10 px-2 py-px font-display text-[0.52rem] font-bold tracking-[0.2em] text-gold uppercase">
@@ -242,7 +242,7 @@ export default function AdminHome() {
                       </span>
                     ) : (
                       <span className="rounded-full border border-line px-2 py-0.5 font-display text-[0.56rem] font-bold tracking-[0.18em] text-mute uppercase">
-                        Unawakened
+                        Unascended
                       </span>
                     )}
                   </div>

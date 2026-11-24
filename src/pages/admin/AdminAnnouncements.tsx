@@ -130,7 +130,7 @@ export default function AdminAnnouncements() {
           <Megaphone size={20} className="shrink-0" />
           System Broadcasts
         </h1>
-        <p className="mt-1 text-sm text-mute">Active broadcasts appear on every Hunter's dashboard.</p>
+        <p className="mt-1 text-sm text-mute">Active broadcasts appear on every Ascendant's dashboard.</p>
       </motion.header>
 
       {error && (
@@ -148,7 +148,7 @@ export default function AdminAnnouncements() {
               id="ann-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Double XP weekend — the Gate is open"
+              placeholder="e.g. Double XP weekend — the System rewards the bold"
               className="sys-input"
             />
           </div>
@@ -161,7 +161,7 @@ export default function AdminAnnouncements() {
               value={body}
               onChange={(e) => setBody(e.target.value)}
               rows={3}
-              placeholder="The System's message to all Hunters…"
+              placeholder="The System's message to all Ascendants…"
               className="sys-input resize-y"
             />
           </div>

@@ -31,6 +31,7 @@ create table if not exists public.assessments (
   days_per_week int,
   session_length_min int,
   diet_pref text,
+  country text,
   allergies text[] not null default '{}',
   health_flags jsonb not null default '{}'::jsonb,
   bmi numeric,

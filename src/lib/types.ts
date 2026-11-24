@@ -27,6 +27,7 @@ export interface Assessment {
   days_per_week: number | null
   session_length_min: number | null
   diet_pref: string | null
+  country: string | null
   allergies: string[]
   health_flags: Record<string, boolean>
   bmi: number | null
